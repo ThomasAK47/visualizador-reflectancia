@@ -30,33 +30,6 @@ function wlToRgbVisible(wl) {
   return { r, g, b };
 }
 
-/**
- * Integra a refletância na faixa visível ponderada pela cor de cada
- * comprimento de onda, devolvendo um RGB 0–255 aproximado.
- * @param {number[]} data    refletâncias
- * @param {number[]} wavelengths comprimentos de onda correspondentes
- */
-function computeColor(data, wavelengths) {
-  let r = 0, g = 0, b = 0, wt = 0;
-  data.forEach((val, i) => {
-    const wl = wavelengths[i];
-    if (wl > 700) return;
-    const c = wlToRgbVisible(wl);
-    r += c.r * val;
-    g += c.g * val;
-    b += c.b * val;
-    wt++;
-  });
-  // Guard clause: evita divisão por zero se nenhuma banda visível for somada.
-  if (wt === 0) return { r: 0, g: 0, b: 0 };
-  const scale = 2.8;
-  return {
-    r: Math.min(255, Math.round((r / wt) * 255 * scale)),
-    g: Math.min(255, Math.round((g / wt) * 255 * scale)),
-    b: Math.min(255, Math.round((b / wt) * 255 * scale)),
-  };
-}
-
 /** Retorna uma versão de `fn` que só dispara após `wait` ms de silêncio. */
 function debounce(fn, wait = 100) {
   let timer = null;

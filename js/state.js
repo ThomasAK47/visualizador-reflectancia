@@ -4,6 +4,7 @@
 
 const state = {
   mode: 'single',                 // 'single' | 'overlay'
+  satellite: 'S2',                // 'S2' (Sentinel-2) | 'L8' (Landsat 8)
   activePreset: 'floresta_nativa', // preset selecionado no modo individual
   currentData: [],                // refletâncias da curva ativa (modo individual)
   singleColor: null,              // cor da linha individual (definida via CSS var na init)

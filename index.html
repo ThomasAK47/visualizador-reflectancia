@@ -17,6 +17,8 @@
   <script src="js/utils.js" defer></script>
   <script src="js/presets.js" defer></script>
   <script src="js/state.js" defer></script>
+  <script src="js/satellites.js" defer></script>
+  <script src="js/indices.js" defer></script>
   <script src="js/canvas.js" defer></script>
   <script src="js/chart.js" defer></script>
   <script src="js/ui.js" defer></script>
@@ -26,6 +28,14 @@
     <header>
       <h1>Assinaturas Espectrais de Superfícies</h1>
       <p class="subtitle">Selecione uma cobertura ou desenhe sua curva diretamente no gráfico (400–2500 nm)</p>
+
+      <div class="sat-row" role="group" aria-label="Satélite">
+        <span class="sat-label">Satélite:</span>
+        <div class="toggle-wrap">
+          <button type="button" class="toggle-btn active" id="btnSatS2">Sentinel-2</button>
+          <button type="button" class="toggle-btn" id="btnSatL8">Landsat 8</button>
+        </div>
+      </div>
     </header>
 
     <main>
@@ -65,13 +75,8 @@
 
         <div id="overlayLegend" class="legend-wrap is-hidden"></div>
 
-        <!-- Métricas -->
+        <!-- Métricas gerais -->
         <div class="info-row">
-          <div class="info-box color-center">
-            <div class="label">Cor resultante (visível)</div>
-            <div id="colorSwatch"></div>
-            <div class="sub" id="rgbText">rgb(—)</div>
-          </div>
           <div class="info-box">
             <div class="label">Refletância média</div>
             <div class="value" id="statMean">—</div>
@@ -82,16 +87,12 @@
             <div class="value" id="statPeak">—</div>
             <div class="sub" id="statPeakWl">nm</div>
           </div>
-          <div class="info-box">
-            <div class="label">NDVI estimado</div>
-            <div class="value" id="statNDVI">—</div>
-            <div class="sub">NIR 840 / R 660</div>
-          </div>
-          <div class="info-box">
-            <div class="label">NDWI estimado</div>
-            <div class="value" id="statNDWI">—</div>
-            <div class="sub">G 560 / NIR 840</div>
-          </div>
+        </div>
+
+        <!-- Índices e composições (recalculados conforme o satélite ativo) -->
+        <div class="cards-section">
+          <h3 class="section-label">ÍNDICES E COMPOSIÇÕES</h3>
+          <div class="cards-grid" id="cardsGrid"></div>
         </div>
 
         <!-- Tabela de valores por banda -->

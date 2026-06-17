@@ -237,14 +237,66 @@ h1 {
 .info-box .value { font-size: 18px; font-weight: 700; color: var(--text); }
 .info-box .sub { font-size: var(--fs-small); color: var(--text-mute); margin-top: 2px; }
 
-.color-center { text-align: center; flex: 0 0 auto; }
-#colorSwatch {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  border: 3px solid var(--border);
-  display: inline-block;
-  transition: background 0.1s;
+/* ---- Seletor de satélite ---- */
+.sat-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  font-size: var(--fs-body);
+  color: var(--text-soft);
+}
+.sat-label { font-weight: 600; }
+
+/* ---- Cards de índice e composição ---- */
+.cards-section { margin-top: 16px; }
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+.idx-card {
+  background: var(--surface-alt);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  text-align: center;
+}
+.idx-card[title] { cursor: help; }
+.card-title { font-size: 14px; font-weight: 700; color: var(--text); }
+.card-sub {
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.card-value { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.idx-track {
+  height: 8px;
+  background: var(--border-soft);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.idx-fill { height: 8px; border-radius: 4px; transition: width 0.25s, background 0.25s; }
+.card-swatch {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  border: 2px solid var(--border);
+  margin: 4px auto 8px;
+}
+.swatch-empty {
+  background: repeating-linear-gradient(45deg, #eee, #eee 4px, #f8f8f8 4px, #f8f8f8 8px);
+}
+.card-formula {
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 10px;
+  color: var(--text-mute);
+  background: var(--surface);
+  border-radius: 4px;
+  padding: 3px 4px;
 }
 
 /* ---- Tabela de bandas ---- */

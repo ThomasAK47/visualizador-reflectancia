@@ -116,23 +116,14 @@ function getStatsData(s) {
 }
 
 function renderInfo(data) {
-  const swatch = document.getElementById('colorSwatch');
   const set = (id, txt) => { document.getElementById(id).textContent = txt; };
 
   if (!data) {
-    swatch.style.background = cssVar('--surface-alt');
-    set('rgbText', 'rgb(—)');
     set('statMean', '—');
     set('statPeak', '—');
     set('statPeakWl', 'nm');
-    set('statNDVI', '—');
-    set('statNDWI', '—');
     return;
   }
-
-  const col = computeColor(data, wavelengths);
-  swatch.style.background = `rgb(${col.r},${col.g},${col.b})`;
-  set('rgbText', `rgb(${col.r}, ${col.g}, ${col.b})`);
 
   const mean = data.reduce((s, v) => s + v, 0) / data.length;
   set('statMean', mean.toFixed(3));
@@ -141,12 +132,90 @@ function renderInfo(data) {
   data.forEach((v, i) => { if (v > maxV) { maxV = v; maxIdx = i; } });
   set('statPeak', maxV.toFixed(3));
   set('statPeakWl', wavelengths[maxIdx] + ' nm');
+}
 
-  const nir = getAtWl(data, 840);
-  const red = getAtWl(data, 660);
-  const grn = getAtWl(data, 560);
-  set('statNDVI', ((nir + red) > 0 ? (nir - red) / (nir + red) : 0).toFixed(3));
-  set('statNDWI', ((grn + nir) > 0 ? (grn - nir) / (grn + nir) : 0).toFixed(3));
+/* ---- Cards de índice e composição --------------------------------------- */
+const OUT_OF_RANGE = 'fora do intervalo espectral';
+
+function buildIndexCard(def, s, data) {
+  const sat = s.satellite;
+  const card = document.createElement('div');
+  card.className = 'idx-card';
+
+  const title = document.createElement('div');
+  title.className = 'card-title';
+  title.textContent = def.title;
+  const sub = document.createElement('div');
+  sub.className = 'card-sub';
+  sub.textContent = def.subtitle;
+
+  const valueEl = document.createElement('div');
+  valueEl.className = 'card-value';
+  const track = document.createElement('div');
+  track.className = 'idx-track';
+  const fill = document.createElement('div');
+  fill.className = 'idx-fill';
+  track.appendChild(fill);
+
+  const value = data ? computeIndex(data, sat, def) : null;
+  if (value === null) {
+    valueEl.textContent = '—';
+    fill.style.width = '0%';
+    card.title = data ? OUT_OF_RANGE : def.tooltip;
+  } else {
+    valueEl.textContent = value.toFixed(3);
+    const c = scaleColor(def.scale, value);
+    fill.style.width = ((value + 1) / 2 * 100).toFixed(1) + '%';
+    fill.style.background = `rgb(${c.r},${c.g},${c.b})`;
+    card.title = def.tooltip;
+  }
+
+  const formula = document.createElement('div');
+  formula.className = 'card-formula';
+  formula.textContent = indexFormula(sat, def);
+
+  card.append(title, sub, valueEl, track, formula);
+  return card;
+}
+
+function buildCompositeCard(def, s, data) {
+  const sat = s.satellite;
+  const card = document.createElement('div');
+  card.className = 'idx-card';
+
+  const title = document.createElement('div');
+  title.className = 'card-title';
+  title.textContent = def.title;
+  const sub = document.createElement('div');
+  sub.className = 'card-sub';
+  sub.textContent = def.subtitle;
+
+  const swatch = document.createElement('div');
+  swatch.className = 'card-swatch';
+
+  const rgb = data ? computeComposite(data, sat, def) : null;
+  if (rgb === null) {
+    swatch.classList.add('swatch-empty');
+    card.title = data ? OUT_OF_RANGE : def.tooltip;
+  } else {
+    swatch.style.background = `rgb(${rgb.r},${rgb.g},${rgb.b})`;
+    card.title = def.tooltip;
+  }
+
+  const formula = document.createElement('div');
+  formula.className = 'card-formula';
+  formula.textContent = compositeFormula(sat, def);
+
+  card.append(title, sub, swatch, formula);
+  return card;
+}
+
+function renderCards(s) {
+  const data = getStatsData(s);
+  const grid = document.getElementById('cardsGrid');
+  grid.replaceChildren();
+  INDEX_CARDS.forEach(def => grid.appendChild(buildIndexCard(def, s, data)));
+  COMPOSITE_CARDS.forEach(def => grid.appendChild(buildCompositeCard(def, s, data)));
 }
 
 function renderTable(data) {
@@ -224,13 +293,22 @@ function renderLegend(s) {
   });
 }
 
+function setSatellite(sat) {
+  if (sat !== 'S2' && sat !== 'L8') return;
+  updateState({ satellite: sat }); // recálculo de todos os cards via render central
+}
+
 /** Render central registrado no estado. */
 function render(s) {
   renderChart(s);
   const data = getStatsData(s);
   renderInfo(data);
   renderTable(data);
+  renderCards(s);
   renderLegend(s);
+  // sincroniza o estado visual do seletor de satélite
+  document.getElementById('btnSatS2').classList.toggle('active', s.satellite === 'S2');
+  document.getElementById('btnSatL8').classList.toggle('active', s.satellite === 'L8');
 }
 
 /* ---- Inicialização ------------------------------------------------------- */
@@ -245,6 +323,9 @@ function init() {
 
   document.getElementById('btnSingle').addEventListener('click', () => setMode('single'));
   document.getElementById('btnOverlay').addEventListener('click', () => setMode('overlay'));
+
+  document.getElementById('btnSatS2').addEventListener('click', () => setSatellite('S2'));
+  document.getElementById('btnSatL8').addEventListener('click', () => setSatellite('L8'));
 
   window.addEventListener('resize', debounce(buildSpectrumBar, 100));
 
