@@ -1,0 +1,282 @@
+/* style.css — estilos da aplicação. Toda cor/tipografia de tema vem das
+   variáveis em :root. Cores de domínio (presets, bandas) vivem nos dados JS. */
+
+:root {
+  /* Tipografia */
+  --font-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --fs-title: 20px;
+  --fs-body: 13px;
+  --fs-small: 11px;
+
+  /* Cores de tema */
+  --accent: #2563eb;
+  --accent-strong: #1d4ed8;
+  --accent-soft: #eff6ff;
+  --accent-fill: rgba(37, 99, 235, 0.08);
+  --accent-hover: #4a90d9;
+  --accent-hover-bg: #f0f6ff;
+  --accent-hover-text: #1a5fa8;
+
+  --bg: #f0f2f5;
+  --surface: #fff;
+  --surface-alt: #f8f9fa;
+  --surface-muted: #fafafa;
+  --border: #e0e0e0;
+  --border-soft: #f0f0f0;
+
+  --text: #1a1a1a;
+  --text-soft: #555;
+  --text-mute: #666;
+  --muted: #888;
+  --faint: #aaa;
+
+  --danger: #c00;
+  --danger-strong: #900;
+  --danger-bg: #fff5f5;
+  --danger-bg-hover: #fee;
+  --danger-border: #fcc;
+  --danger-border-hover: #f88;
+
+  /* Forma */
+  --radius-card: 14px;
+  --radius-md: 10px;
+  --radius-sm: 6px;
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.08);
+  --max-w: 900px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-base);
+  background: var(--bg);
+  color: var(--text);
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.page { max-width: var(--max-w); margin: 0 auto; }
+
+h1 {
+  font-size: var(--fs-title);
+  font-weight: 600;
+  text-align: center;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: var(--fs-body);
+  color: var(--text-mute);
+  margin-bottom: 16px;
+}
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.section-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 10px;
+  letter-spacing: 0.5px;
+}
+
+/* ---- Foco visível global (acessibilidade) ---- */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Utilidade de visibilidade (substitui estilos inline display:none) */
+.is-hidden { display: none !important; }
+
+/* ---- Grade de presets ---- */
+.presets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.btn-preset {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  padding: 10px 6px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border);
+  background: var(--surface-muted);
+  transition: all 0.2s;
+  font: 600 12px/1.2 var(--font-base);
+  color: #333;
+  text-align: center;
+}
+
+.btn-preset:hover {
+  border-color: var(--accent-hover);
+  background: var(--accent-hover-bg);
+  color: var(--accent-hover-text);
+}
+
+.btn-preset.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.btn-preset .icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.btn-preset .icon-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--danger);
+  background: #eee;
+  border: 1px solid #ccc;
+}
+
+.btn-clear { background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger); }
+.btn-clear:hover { background: var(--danger-bg-hover); border-color: var(--danger-border-hover); color: var(--danger-strong); }
+
+/* ---- Alternador de modo ---- */
+.mode-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: var(--fs-body);
+  color: var(--text-soft);
+}
+
+.toggle-wrap {
+  display: flex;
+  background: var(--border-soft);
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.toggle-btn {
+  padding: 5px 14px;
+  border-radius: var(--radius-sm);
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  background: transparent;
+  color: var(--text-mute);
+  transition: all 0.2s;
+}
+
+.toggle-btn.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+.overlay-hint { font-size: var(--fs-small); color: #999; }
+
+/* ---- Gráfico ---- */
+.chart-wrap { position: relative; height: 320px; width: 100%; margin-bottom: 12px; }
+
+/* ---- Barra de espectro ---- */
+.spectrum-bar-wrap { width: 100%; margin-bottom: 6px; }
+.spectrum-bar { height: 14px; width: 100%; border-radius: 4px; display: block; }
+.axis-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ---- Legenda da sobreposição ---- */
+.legend-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--fs-small);
+  color: var(--text-soft);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-base);
+}
+.legend-item:hover { background: var(--surface-alt); }
+.legend-dot { width: 18px; height: 3px; border-radius: 2px; }
+
+/* ---- Caixas de informação ---- */
+.info-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+.info-box {
+  flex: 1;
+  min-width: 120px;
+  background: var(--surface-alt);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  text-align: center;
+}
+.info-box .label { font-size: var(--fs-small); color: var(--muted); margin-bottom: 6px; }
+.info-box .value { font-size: 18px; font-weight: 700; color: var(--text); }
+.info-box .sub { font-size: var(--fs-small); color: var(--text-mute); margin-top: 2px; }
+
+.color-center { text-align: center; flex: 0 0 auto; }
+#colorSwatch {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  display: inline-block;
+  transition: background 0.1s;
+}
+
+/* ---- Tabela de bandas ---- */
+.band-section { margin-top: 14px; }
+.band-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.band-table th {
+  color: var(--muted);
+  font-weight: 500;
+  padding: 4px 8px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+.band-table td {
+  padding: 4px 8px;
+  text-align: center;
+  border-bottom: 1px solid var(--border-soft);
+}
+.band-table tr:last-child td { border-bottom: none; }
+.band-chip {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+.sensor-cell { color: #999; }
+
+.bar-row { display: flex; align-items: center; gap: 6px; }
+.bar-track { width: 80px; background: var(--border-soft); border-radius: 3px; height: 6px; }
+.bar-fill { height: 6px; border-radius: 3px; transition: width 0.2s; }
+.bar-num { font-weight: 600; }
+
+/* ---- Dica ---- */
+.hint { font-size: var(--fs-small); color: var(--faint); text-align: center; margin-top: 6px; }

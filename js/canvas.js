@@ -1,0 +1,97 @@
+/* canvas.js — barra de espectro e desenho à mão livre sobre o gráfico.
+ * Depende de `chart` (criado em chart.js) e do estado central.
+ * As funções de interação são ativadas por `initCanvasInteractions()`,
+ * chamada pela UI somente após o gráfico existir. */
+
+/** Desenha a barra de gradiente espectral sob o gráfico. */
+function buildSpectrumBar() {
+  const canvas = document.getElementById('specBar');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = canvas.offsetWidth;
+  const cssH = 14;
+  canvas.width = cssW * dpr;
+  canvas.height = cssH * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // reseta + escala (evita acúmulo entre resizes)
+
+  for (let x = 0; x < cssW; x++) {
+    const wl = WL_MIN + (WL_MAX - WL_MIN) * (x / cssW);
+    let r, g, b, a;
+    if (wl < 380) {
+      r = 80; g = 0; b = 120; a = 0.3 + (wl - 300) / 80 * 0.5;
+    } else if (wl <= 700) {
+      const c = wlToRgbVisible(wl);
+      let fade = 1;
+      if (wl < 420) fade = (wl - 380) / 40;
+      if (wl > 680) fade = 1 - (wl - 680) / 20;
+      r = c.r * 255; g = c.g * 255; b = c.b * 255; a = fade;
+    } else if (wl <= 1000) {
+      const t = (wl - 700) / 300;
+      r = 180 - 100 * t; g = 0; b = 0; a = 0.5 - 0.4 * t;
+    } else {
+      r = 40; g = 40; b = 40; a = 0.25;
+    }
+    ctx.fillStyle = `rgba(${Math.round(r)},${Math.round(g)},${Math.round(b)},${a.toFixed(2)})`;
+    ctx.fillRect(x, 0, 1, cssH);
+  }
+}
+
+/** Converte um evento de mouse/touch em { wlVal, rVal } no espaço de dados. */
+function getChartPoint(e) {
+  const rect = chart.canvas.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  const x = clientX - rect.left;
+  const y = clientY - rect.top;
+  return {
+    wlVal: chart.scales.x.getValueForPixel(x),
+    rVal: chart.scales.y.getValueForPixel(y),
+  };
+}
+
+/** Aplica um "pincel" gaussiano à curva no ponto desenhado e re-renderiza. */
+function applyDraw(wlVal, rVal) {
+  const idx = Math.round((wlVal - WL_MIN) / WL_STEP);
+  const target = clamp(rVal);
+  const radius = 8;
+  const next = state.currentData.slice();
+  for (let di = -radius; di <= radius; di++) {
+    const i = idx + di;
+    if (i < 0 || i >= N) continue;
+    const falloff = 1 - Math.abs(di) / (radius + 1);
+    next[i] = next[i] + (target - next[i]) * falloff * 0.6;
+  }
+  // Estado atualizado via função central; o render decorrente é leve
+  // (sem animação) porque state.isDrawing está ativo.
+  updateState({ currentData: next });
+}
+
+/** Liga os listeners de desenho ao canvas do gráfico (só no modo individual). */
+function initCanvasInteractions() {
+  const cv = chart.canvas;
+
+  const startDraw = (e) => {
+    if (state.mode !== 'single') return;
+    updateState({ isDrawing: true }, { render: false });
+    const p = getChartPoint(e);
+    applyDraw(p.wlVal, p.rVal);
+  };
+  const moveDraw = (e, isTouch) => {
+    if (!state.isDrawing || state.mode !== 'single') return;
+    const p = getChartPoint(e);
+    applyDraw(p.wlVal, p.rVal);
+    if (isTouch) e.preventDefault();
+  };
+  const endDraw = () => {
+    if (state.isDrawing) updateState({ isDrawing: false }, { render: false });
+  };
+
+  cv.addEventListener('mousedown', startDraw);
+  cv.addEventListener('mousemove', (e) => moveDraw(e, false));
+  window.addEventListener('mouseup', endDraw);
+
+  cv.addEventListener('touchstart', startDraw, { passive: true });
+  cv.addEventListener('touchmove', (e) => moveDraw(e, true), { passive: false });
+  window.addEventListener('touchend', endDraw);
+}

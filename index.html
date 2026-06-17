@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assinaturas Espectrais Interativas</title>
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Chart.js via CDN com SRI (subresource integrity) -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"
+    integrity="sha384-e6cc9LaIG7xZ3XD5B+jtr1NhTWPQGQdRCh6xiZ+ZFUtWCpg4ycv3Sh+SkZoopvUY"
+    crossorigin="anonymous"
+    defer></script>
+
+  <!-- Scripts da aplicação, em ordem de dependência (defer = executam após o DOM) -->
+  <script src="js/utils.js" defer></script>
+  <script src="js/presets.js" defer></script>
+  <script src="js/state.js" defer></script>
+  <script src="js/canvas.js" defer></script>
+  <script src="js/chart.js" defer></script>
+  <script src="js/ui.js" defer></script>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>Assinaturas Espectrais de Superfícies</h1>
+      <p class="subtitle">Selecione uma cobertura ou desenhe sua curva diretamente no gráfico (400–2500 nm)</p>
+    </header>
+
+    <main>
+      <!-- Presets -->
+      <section class="card" aria-labelledby="presetsTitle">
+        <h2 id="presetsTitle" class="section-label">COBERTURAS DO SOLO</h2>
+        <div class="presets-grid" id="presetsGrid"></div>
+        <p class="hint">Clique para carregar · Arraste no gráfico para desenhar sua própria curva</p>
+      </section>
+
+      <!-- Gráfico e métricas -->
+      <section class="card" aria-labelledby="chartTitle">
+        <h2 id="chartTitle" class="section-label">ASSINATURA ESPECTRAL</h2>
+
+        <div class="mode-row">
+          <span>Modo:</span>
+          <div class="toggle-wrap" role="group" aria-label="Modo de visualização">
+            <button type="button" class="toggle-btn active" id="btnSingle">Individual</button>
+            <button type="button" class="toggle-btn" id="btnOverlay">Sobreposição</button>
+          </div>
+          <span id="overlayHint" class="overlay-hint is-hidden">Clique em múltiplos presets para comparar</span>
+        </div>
+
+        <!-- Barra de gradiente espectral -->
+        <div class="spectrum-bar-wrap">
+          <canvas id="specBar" class="spectrum-bar" height="14"></canvas>
+          <div class="axis-labels">
+            <span>400 nm</span><span>500 nm</span><span>600 nm</span>
+            <span>700 nm</span><span>900 nm</span><span>1100 nm</span>
+            <span>1600 nm</span><span>2200 nm</span><span>2500 nm</span>
+          </div>
+        </div>
+
+        <div class="chart-wrap">
+          <canvas id="mainChart" role="img" aria-label="Gráfico de assinatura espectral mostrando refletância em função do comprimento de onda">Curva espectral interativa.</canvas>
+        </div>
+
+        <div id="overlayLegend" class="legend-wrap is-hidden"></div>
+
+        <!-- Métricas -->
+        <div class="info-row">
+          <div class="info-box color-center">
+            <div class="label">Cor resultante (visível)</div>
+            <div id="colorSwatch"></div>
+            <div class="sub" id="rgbText">rgb(—)</div>
+          </div>
+          <div class="info-box">
+            <div class="label">Refletância média</div>
+            <div class="value" id="statMean">—</div>
+            <div class="sub">0.0 – 1.0</div>
+          </div>
+          <div class="info-box">
+            <div class="label">Pico máximo</div>
+            <div class="value" id="statPeak">—</div>
+            <div class="sub" id="statPeakWl">nm</div>
+          </div>
+          <div class="info-box">
+            <div class="label">NDVI estimado</div>
+            <div class="value" id="statNDVI">—</div>
+            <div class="sub">NIR 840 / R 660</div>
+          </div>
+          <div class="info-box">
+            <div class="label">NDWI estimado</div>
+            <div class="value" id="statNDWI">—</div>
+            <div class="sub">G 560 / NIR 840</div>
+          </div>
+        </div>
+
+        <!-- Tabela de valores por banda -->
+        <div class="band-section">
+          <h3 class="section-label">VALORES POR BANDA</h3>
+          <table class="band-table">
+            <thead>
+              <tr>
+                <th scope="col">Banda</th>
+                <th scope="col">λ central</th>
+                <th scope="col">Refletância</th>
+                <th scope="col">Sensor ref.</th>
+              </tr>
+            </thead>
+            <tbody id="bandTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
