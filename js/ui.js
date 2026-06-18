@@ -309,7 +309,20 @@ function renderLegend(s) {
 
 function setSatellite(sat) {
   if (sat !== 'S2' && sat !== 'L8') return;
+  if (state.satellite === sat) return;
   updateState({ satellite: sat }); // recálculo de todos os cards via render central
+  flashRecalc();                   // feedback visual de que tudo foi recalculado
+}
+
+/** Pisca cards e tabela para sinalizar recálculo (após troca de satélite). */
+function flashRecalc() {
+  ['cardsGrid', 'bandTableBody'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('recalc-flash');
+    void el.offsetWidth;          // força reflow p/ reiniciar a animação
+    el.classList.add('recalc-flash');
+  });
 }
 
 /** Render central registrado no estado. */

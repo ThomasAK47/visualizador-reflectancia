@@ -3,9 +3,9 @@
  * consumidas pela camada de UI. */
 
 /* Cores/fonte do gráfico vêm do tema (CSS vars) — fonte única de verdade. */
-const CHART_GRID = cssVar('--bd2');   // linhas de grade (visíveis no fundo escuro)
-const CHART_TEXT = cssVar('--tx2');   // ticks e títulos dos eixos
-const CHART_FONT = "'IBM Plex Mono', ui-monospace, monospace";
+const CHART_GRID = cssVar('--bd2');        // linhas de grade (visíveis no fundo escuro)
+const CHART_TEXT = cssVar('--tx2');        // ticks e títulos dos eixos
+const CHART_FONT = cssVar('--font-mono');  // fonte mono do tema (fonte única)
 
 const chart = new Chart(document.getElementById('mainChart').getContext('2d'), {
   type: 'line',
