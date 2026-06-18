@@ -28,6 +28,38 @@ const INDEX_CARDS = [
     useFor: 'Extração de corpos d’água em áreas urbanas ou com vegetação densa onde o NDWI clássico superestima a água.',
     range: '< 0 (solo/vegetação) → > 0 (água, com menos ruído que o NDWI)',
   },
+  {
+    key: 'nbr', title: 'NBR', subtitle: 'Queimadas', scale: 'ndvi',
+    bands: { S2: ['B8', 'B12'], L8: ['B5', 'B7'] },
+    tooltip: 'Razão de Queimada Normalizada. Vegetação sadia em verde; áreas queimadas em vermelho.',
+    whatIs: 'Razão de Queimada Normalizada. Compara o infravermelho próximo (alto em vegetação sadia) com o SWIR2 (alto em áreas queimadas).',
+    useFor: 'Detecção e mapeamento de áreas queimadas e avaliação da severidade de incêndios (sobretudo via dNBR, a diferença pré/pós-fogo).',
+    range: '< 0 (queimada/solo/água) → ~0 → > 0,3 (vegetação sadia)',
+  },
+  {
+    key: 'ndmi', title: 'NDMI', subtitle: 'Umidade da vegetação', scale: 'water',
+    bands: { S2: ['B8', 'B11'], L8: ['B5', 'B6'] },
+    tooltip: 'Índice de Umidade por Diferença Normalizada. Relaciona NIR e SWIR1, sensível à água da vegetação.',
+    whatIs: 'Índice de Umidade por Diferença Normalizada. Relaciona o NIR com o SWIR1, sensível ao conteúdo de água da vegetação.',
+    useFor: 'Monitoramento do teor de umidade da vegetação, estresse hídrico em culturas e avaliação de risco de incêndio.',
+    range: '< 0 (vegetação seca / estresse hídrico) → > 0 (vegetação com bastante água)',
+  },
+  {
+    key: 'ndbi', title: 'NDBI', subtitle: 'Área construída', scale: 'urban',
+    bands: { S2: ['B11', 'B8'], L8: ['B6', 'B5'] },
+    tooltip: 'Índice de Área Construída por Diferença Normalizada. Realça superfícies impermeáveis.',
+    whatIs: 'Índice de Área Construída por Diferença Normalizada. Usa SWIR1 menos NIR para realçar superfícies impermeáveis.',
+    useFor: 'Mapeamento de áreas urbanas e expansão de superfícies construídas; separação entre cidade e vegetação.',
+    range: '< 0 (vegetação/água) → > 0 (área construída / solo exposto)',
+  },
+  {
+    key: 'ndsi', title: 'NDSI', subtitle: 'Neve', scale: 'snow',
+    bands: { S2: ['B3', 'B11'], L8: ['B3', 'B6'] },
+    tooltip: 'Índice de Neve por Diferença Normalizada. Neve/gelo em tons claros.',
+    whatIs: 'Índice de Neve por Diferença Normalizada. Explora a alta reflexão da neve no verde e a baixa no SWIR1.',
+    useFor: 'Mapeamento de cobertura de neve e gelo; ajuda a distinguir neve de nuvens.',
+    range: '< 0 (sem neve) → > 0,4 (neve / gelo)',
+  },
 ];
 
 /* ---- Cards de composição RGB (swatch de cor simulada) ------------------- *
@@ -111,6 +143,10 @@ const SCALES = {
   ndvi: { neg: [[215, 48, 39], [255, 255, 191]], pos: [[255, 255, 191], [26, 120, 50]] },
   // marrom (-1) → branco (0) → azul (+1)
   water: { neg: [[140, 81, 10], [245, 245, 245]], pos: [[245, 245, 245], [33, 102, 172]] },
+  // verde (-1) → cinza (0) → magenta (+1) — área construída
+  urban: { neg: [[26, 120, 50], [180, 190, 195]], pos: [[180, 190, 195], [192, 38, 211]] },
+  // azul escuro (-1) → cinza-azulado (0) → branco (+1) — neve/gelo
+  snow: { neg: [[40, 80, 120], [150, 170, 185]], pos: [[150, 170, 185], [240, 248, 255]] },
 };
 
 function lerpChannel(a, b, t) { return Math.round(a + (b - a) * t); }
