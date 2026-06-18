@@ -19,6 +19,7 @@
   <script src="js/state.js" defer></script>
   <script src="js/satellites.js" defer></script>
   <script src="js/indices.js" defer></script>
+  <script src="js/modal.js" defer></script>
   <script src="js/canvas.js" defer></script>
   <script src="js/chart.js" defer></script>
   <script src="js/ui.js" defer></script>
@@ -97,14 +98,14 @@
 
         <!-- Tabela de valores por banda -->
         <div class="band-section">
-          <h3 class="section-label">VALORES POR BANDA</h3>
+          <h3 class="section-label">VALORES POR BANDA <span id="bandTableNote" class="table-note"></span></h3>
           <table class="band-table">
             <thead>
               <tr>
                 <th scope="col">Banda</th>
+                <th scope="col">Nome</th>
                 <th scope="col">λ central</th>
                 <th scope="col">Refletância</th>
-                <th scope="col">Sensor ref.</th>
               </tr>
             </thead>
             <tbody id="bandTableBody"></tbody>

@@ -257,12 +257,19 @@ h1 {
   gap: 12px;
 }
 .idx-card {
+  display: block;
+  width: 100%;
   background: var(--surface-alt);
+  border: 1px solid transparent;
   border-radius: var(--radius-md);
   padding: 12px 14px;
   text-align: center;
+  font-family: var(--font-base);
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.1s;
 }
-.idx-card[title] { cursor: help; }
+.idx-card:hover { border-color: var(--accent); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); }
+.idx-card:active { transform: translateY(1px); }
 .card-title { font-size: 14px; font-weight: 700; color: var(--text); }
 .card-sub {
   font-size: 10px;
@@ -330,5 +337,73 @@ h1 {
 .bar-fill { height: 6px; border-radius: 3px; transition: width 0.2s; }
 .bar-num { font-weight: 600; }
 
+.table-note { font-weight: 400; color: var(--text-mute); letter-spacing: 0; text-transform: none; }
+
 /* ---- Dica ---- */
 .hint { font-size: var(--fs-small); color: var(--faint); text-align: center; margin-top: 6px; }
+
+/* ---- Modal explicativo ---- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.modal-overlay.is-open { opacity: 1; }
+.modal-overlay[hidden] { display: none; }
+
+.modal {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  box-shadow: 0 12px 44px rgba(0, 0, 0, 0.28);
+  padding: 24px 26px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.modal-overlay.is-open .modal { opacity: 1; transform: translateY(0); }
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: var(--surface-alt);
+  color: var(--text-mute);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.modal-close:hover { background: var(--danger-bg); color: var(--danger); }
+
+.modal-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 2px; padding-right: 28px; }
+.modal-subtitle { font-size: var(--fs-small); color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 14px; }
+
+.modal-block { margin-bottom: 14px; }
+.modal-block:last-child { margin-bottom: 0; }
+.modal-label { display: block; font-size: 11px; font-weight: 700; color: var(--accent-strong); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; }
+.modal-sat { font-weight: 400; color: var(--muted); text-transform: none; letter-spacing: 0; }
+.modal-text { font-size: var(--fs-body); color: var(--text-soft); line-height: 1.5; }
+.modal-formula {
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--surface-alt);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+}

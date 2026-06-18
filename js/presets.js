@@ -10,17 +10,6 @@ const wavelengths = [];
 for (let w = WL_MIN; w <= WL_MAX; w += WL_STEP) wavelengths.push(w);
 const N = wavelengths.length;
 
-/** Bandas de sensores reais usadas na tabela "valores por banda". */
-const BANDS = [
-  { name: 'Azul',     wl: 480,  color: '#3b82f6', sensor: 'Sentinel-2 B2' },
-  { name: 'Verde',    wl: 560,  color: '#22c55e', sensor: 'Sentinel-2 B3' },
-  { name: 'Verm.',    wl: 660,  color: '#ef4444', sensor: 'Sentinel-2 B4' },
-  { name: 'Red Edge', wl: 705,  color: '#f97316', sensor: 'Sentinel-2 B5' },
-  { name: 'NIR',      wl: 840,  color: '#8b5cf6', sensor: 'Sentinel-2 B8' },
-  { name: 'SWIR1',    wl: 1610, color: '#a16207', sensor: 'Landsat 8 B6'  },
-  { name: 'SWIR2',    wl: 2200, color: '#78350f', sensor: 'Landsat 8 B7'  },
-];
-
 /* ---- Avaliador de termos --------------------------------------------------
  * Tipos suportados:
  *   const     → valor fixo

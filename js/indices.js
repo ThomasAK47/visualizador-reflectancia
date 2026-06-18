@@ -8,16 +8,25 @@ const INDEX_CARDS = [
     key: 'ndvi', title: 'NDVI', subtitle: 'Vegetação', scale: 'ndvi',
     bands: { S2: ['B8', 'B4'], L8: ['B5', 'B4'] },
     tooltip: 'Índice de Vegetação por Diferença Normalizada. Valores altos (verde) indicam vegetação vigorosa; baixos indicam solo, água ou área construída.',
+    whatIs: 'Índice de Vegetação por Diferença Normalizada. Mede a densidade e vigor da vegetação com base na diferença entre reflexão no infravermelho próximo e no vermelho.',
+    useFor: 'Monitoramento de cobertura vegetal, detecção de estresse hídrico em culturas, mapeamento de biomassa e saúde de florestas.',
+    range: '−1 (água/solo nu) → 0 (solo exposto/rocha) → 1 (vegetação densa saudável)',
   },
   {
     key: 'ndwi', title: 'NDWI', subtitle: 'Água (McFeeters)', scale: 'water',
     bands: { S2: ['B3', 'B8'], L8: ['B3', 'B5'] },
     tooltip: 'Índice de Água por Diferença Normalizada (McFeeters, 1996). Realça corpos d’água; valores positivos (azul) indicam presença de água.',
+    whatIs: 'Índice de Água por Diferença Normalizada (McFeeters, 1996). Realça corpos d’água usando a banda verde e o infravermelho próximo.',
+    useFor: 'Mapeamento de lagos, rios e reservatórios; monitoramento de cheias e variação de espelhos d’água.',
+    range: '< 0 (vegetação/solo) → ~0 (limiar água/terra) → > 0,2 (água)',
   },
   {
     key: 'mndwi', title: 'MNDWI', subtitle: 'Água modificado', scale: 'water',
     bands: { S2: ['B3', 'B11'], L8: ['B3', 'B6'] },
     tooltip: 'NDWI Modificado (Xu, 2006), usa SWIR no lugar do NIR. Separa melhor água de áreas urbanas e solo exposto.',
+    whatIs: 'Índice de Água por Diferença Normalizada Modificado (Xu, 2006). Substitui o NIR pelo SWIR1, reduzindo interferência de vegetação e áreas urbanas.',
+    useFor: 'Extração de corpos d’água em áreas urbanas ou com vegetação densa onde o NDWI clássico superestima a água.',
+    range: '< 0 (solo/vegetação) → > 0 (água, com menos ruído que o NDWI)',
   },
 ];
 
@@ -28,21 +37,32 @@ const COMPOSITE_CARDS = [
     key: 'true', title: 'Cor Verdadeira', subtitle: 'True Color',
     bands: { S2: ['B4', 'B3', 'B2'], L8: ['B4', 'B3', 'B2'] },
     tooltip: 'Composição em cores naturais (R=Vermelho, G=Verde, B=Azul), como o olho humano enxerga.',
+    whatIs: 'Composição que replica o que o olho humano enxerga, usando as bandas vermelho, verde e azul do sensor.',
+    useFor: 'Interpretação visual intuitiva da paisagem, identificação de feições como estradas, edificações e corpos d’água.',
   },
   {
     key: 'falsecolor', title: 'Falsa Cor', subtitle: 'Vegetação · RGB 453',
     bands: { S2: ['B8', 'B4', 'B3'], L8: ['B5', 'B4', 'B3'] },
     tooltip: 'Falsa cor com NIR no vermelho. Vegetação sadia aparece em tons de vermelho/magenta intensos.',
+    whatIs: 'Composição clássica de falsa cor que desloca as bandas para incluir o infravermelho próximo no canal vermelho. Equivale ao RGB 453 do sensor TM (Landsat 5) e ao RGB 543 do Landsat 8.',
+    useFor: 'Discriminação de tipos de vegetação, detecção de áreas desmatadas e diferenciação entre vegetação nativa e cultivada.',
+    interpretation: 'Vegetação saudável aparece em tons de vermelho intenso; solo exposto em marrom/bege; água em azul escuro.',
   },
   {
     key: 'swir', title: 'Composição SWIR', subtitle: 'SWIR / NIR / Verde',
     bands: { S2: ['B11', 'B8', 'B3'], L8: ['B6', 'B5', 'B3'] },
     tooltip: 'Realça umidade e tipos de solo/rocha usando o infravermelho de ondas curtas (SWIR).',
+    whatIs: 'Composição que usa a banda SWIR1 no canal vermelho, realçando feições que o visível não distingue.',
+    useFor: 'Mapeamento de umidade do solo, identificação de áreas queimadas, diferenciação de tipos de rocha e mineralogia de superfície.',
+    interpretation: 'Áreas úmidas em azul escuro; queimadas em vermelho/laranja; solo seco em verde claro.',
   },
   {
     key: 'agri', title: 'Composição Agrícola', subtitle: 'SWIR / NIR / Azul',
     bands: { S2: ['B11', 'B8A', 'B2'], L8: ['B6', 'B5', 'B2'] },
     tooltip: 'Composição agrícola: distingue culturas, solo e estágios de crescimento.',
+    whatIs: 'Composição que combina SWIR1, NIR estreito e azul para realce de atividade agrícola.',
+    useFor: 'Distinção entre culturas em diferentes estágios fenológicos, mapeamento de áreas irrigadas e monitoramento de safra.',
+    interpretation: 'Culturas ativas em verde brilhante; solo exposto em magenta; água em azul escuro.',
   },
 ];
 

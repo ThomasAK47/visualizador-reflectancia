@@ -1,12 +1,6 @@
 /* ui.js — construção do DOM, render das métricas e todos os listeners.
  * Nenhum onclick inline; nenhum innerHTML com dados dinâmicos. */
 
-/** Refletância no comprimento de onda mais próximo de `targetWl`. */
-function getAtWl(data, targetWl) {
-  const idx = Math.round((targetWl - WL_MIN) / WL_STEP);
-  return data[Math.max(0, Math.min(N - 1, idx))] || 0;
-}
-
 /* ---- Construção dos botões de preset ------------------------------------ */
 function buildPresets() {
   const grid = document.getElementById('presetsGrid');
@@ -139,8 +133,10 @@ const OUT_OF_RANGE = 'fora do intervalo espectral';
 
 function buildIndexCard(def, s, data) {
   const sat = s.satellite;
-  const card = document.createElement('div');
+  const card = document.createElement('button');
+  card.type = 'button';
   card.className = 'idx-card';
+  card.addEventListener('click', () => openCardModal(def, state.satellite, 'index'));
 
   const title = document.createElement('div');
   title.className = 'card-title';
@@ -180,8 +176,10 @@ function buildIndexCard(def, s, data) {
 
 function buildCompositeCard(def, s, data) {
   const sat = s.satellite;
-  const card = document.createElement('div');
+  const card = document.createElement('button');
+  card.type = 'button';
   card.className = 'idx-card';
+  card.addEventListener('click', () => openCardModal(def, state.satellite, 'composite'));
 
   const title = document.createElement('div');
   title.className = 'card-title';
@@ -218,21 +216,41 @@ function renderCards(s) {
   COMPOSITE_CARDS.forEach(def => grid.appendChild(buildCompositeCard(def, s, data)));
 }
 
-function renderTable(data) {
+/** Curva e rótulo para a tabela de bandas conforme o modo.
+ *  Overlay → última curva adicionada (com label discreto). */
+function getTableData(s) {
+  if (s.mode === 'single') return { data: s.currentData, label: null };
+  const keys = Object.keys(s.overlayActive);
+  if (keys.length === 0) return { data: null, label: null };
+  const lastKey = keys[keys.length - 1];
+  return { data: s.overlayActive[lastKey].data, label: PRESET_BY_KEY[lastKey].label };
+}
+
+function renderTable(s) {
+  const { data, label } = getTableData(s);
+
+  // Nota discreta no overlay indicando qual curva a tabela reflete
+  const note = document.getElementById('bandTableNote');
+  note.textContent = label ? `· última curva: ${label}` : '';
+
   const tbody = document.getElementById('bandTableBody');
   tbody.replaceChildren();
 
-  BANDS.forEach(b => {
-    const val = data ? getAtWl(data, b.wl) : 0;
-    const pct = Math.round(val * 100);
+  Object.values(SATELLITES[s.satellite].bands).forEach(b => {
+    const sampled = data ? sampleBand(data, b.wl) : null;
+    const pct = sampled === null ? 0 : Math.round(clamp(sampled) * 100);
     const tr = document.createElement('tr');
 
-    // Banda + chip de cor
-    const tdName = document.createElement('td');
+    // Banda (número) + chip de cor
+    const tdNum = document.createElement('td');
     const chip = document.createElement('span');
     chip.className = 'band-chip';
     chip.style.background = b.color;
-    tdName.append(chip, document.createTextNode(b.name));
+    tdNum.append(chip, document.createTextNode(b.num));
+
+    // Nome
+    const tdName = document.createElement('td');
+    tdName.textContent = b.name;
 
     // λ central
     const tdWl = document.createElement('td');
@@ -251,16 +269,11 @@ function renderTable(data) {
     track.appendChild(fill);
     const num = document.createElement('span');
     num.className = 'bar-num';
-    num.textContent = data ? val.toFixed(3) : '—';
+    num.textContent = sampled === null ? '—' : sampled.toFixed(3);
     flex.append(track, num);
     tdVal.appendChild(flex);
 
-    // Sensor de referência
-    const tdSensor = document.createElement('td');
-    tdSensor.className = 'sensor-cell';
-    tdSensor.textContent = b.sensor;
-
-    tr.append(tdName, tdWl, tdVal, tdSensor);
+    tr.append(tdNum, tdName, tdWl, tdVal);
     tbody.appendChild(tr);
   });
 }
@@ -303,7 +316,7 @@ function render(s) {
   renderChart(s);
   const data = getStatsData(s);
   renderInfo(data);
-  renderTable(data);
+  renderTable(s);
   renderCards(s);
   renderLegend(s);
   // sincroniza o estado visual do seletor de satélite
@@ -317,6 +330,7 @@ function init() {
   updateState({ singleColor: cssVar('--accent') }, { render: false });
 
   setRenderer(render);
+  initModal();
   buildPresets();
   buildSpectrumBar();
   initCanvasInteractions();
