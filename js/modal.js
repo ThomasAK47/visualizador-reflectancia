@@ -82,7 +82,7 @@ function openCardModal(def, sat, kind) {
   q('.modal-subtitle').textContent = def.subtitle;
   q('[data-field="whatIs"]').textContent = def.whatIs;
   q('[data-field="useFor"]').textContent = def.useFor;
-  q('[data-field="sat"]').textContent = `(${SATELLITES[sat].label})`;
+  q('[data-field="sat"]').textContent = `(${SATELLITES[sat].name})`;
   q('[data-field="formula"]').textContent =
     kind === 'index' ? indexFormula(sat, def) : compositeFormula(sat, def);
 

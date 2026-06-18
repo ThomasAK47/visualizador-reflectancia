@@ -137,7 +137,6 @@ function buildIndexCard(def, s, data) {
   const card = document.createElement('button');
   card.type = 'button';
   card.className = 'idx-card';
-  card.addEventListener('click', () => openCardModal(def, state.satellite, 'index'));
 
   const title = document.createElement('div');
   title.className = 'card-title';
@@ -153,23 +152,34 @@ function buildIndexCard(def, s, data) {
   const fill = document.createElement('div');
   fill.className = 'idx-fill';
   track.appendChild(fill);
-
-  const value = data ? computeIndex(data, sat, def) : null;
-  if (value === null) {
-    valueEl.textContent = '—';
-    fill.style.width = '0%';
-    card.title = data ? OUT_OF_RANGE : def.tooltip;
-  } else {
-    valueEl.textContent = value.toFixed(3);
-    const c = scaleColor(def.scale, value);
-    fill.style.width = ((value + 1) / 2 * 100).toFixed(1) + '%';
-    fill.style.background = `rgb(${c.r},${c.g},${c.b})`;
-    card.title = def.tooltip;
-  }
-
   const formula = document.createElement('div');
   formula.className = 'card-formula';
-  formula.textContent = indexFormula(sat, def);
+
+  const missing = missingIndexRole(sat, def);
+  if (missing) {
+    // Banda ausente neste sensor → card desabilitado, sem modal.
+    card.classList.add('is-disabled');
+    card.setAttribute('aria-disabled', 'true');
+    valueEl.textContent = '—';
+    fill.style.width = '0%';
+    formula.textContent = '—';
+    card.title = `Indisponível: ${SATELLITES[sat].name} não possui banda ${ROLE_LABEL[missing]}`;
+  } else {
+    card.addEventListener('click', () => openCardModal(def, state.satellite, 'index'));
+    const value = data ? computeIndex(data, sat, def) : null;
+    if (value === null) {
+      valueEl.textContent = '—';
+      fill.style.width = '0%';
+      card.title = data ? OUT_OF_RANGE : def.tooltip;
+    } else {
+      valueEl.textContent = value.toFixed(3);
+      const c = scaleColor(def.scale, value);
+      fill.style.width = ((value + 1) / 2 * 100).toFixed(1) + '%';
+      fill.style.background = `rgb(${c.r},${c.g},${c.b})`;
+      card.title = def.tooltip;
+    }
+    formula.textContent = indexFormula(sat, def);
+  }
 
   card.append(title, sub, valueEl, track, formula);
   return card;
@@ -177,33 +187,47 @@ function buildIndexCard(def, s, data) {
 
 function buildCompositeCard(def, s, data) {
   const sat = s.satellite;
+  const cfg = compositionConfig(sat, def.key);
+  // Título/subtítulo podem ser sobrescritos pelo satélite (ex.: L5 "Geológica").
+  const cardDef = cfg && (cfg.title || cfg.subtitle)
+    ? { ...def, title: cfg.title || def.title, subtitle: cfg.subtitle || def.subtitle }
+    : def;
+
   const card = document.createElement('button');
   card.type = 'button';
   card.className = 'idx-card';
-  card.addEventListener('click', () => openCardModal(def, state.satellite, 'composite'));
 
   const title = document.createElement('div');
   title.className = 'card-title';
-  title.textContent = def.title;
+  title.textContent = cardDef.title;
   const sub = document.createElement('div');
   sub.className = 'card-sub';
-  sub.textContent = def.subtitle;
+  sub.textContent = cardDef.subtitle;
 
   const swatch = document.createElement('div');
   swatch.className = 'card-swatch';
-
-  const rgb = data ? computeComposite(data, sat, def) : null;
-  if (rgb === null) {
-    swatch.classList.add('swatch-empty');
-    card.title = data ? OUT_OF_RANGE : def.tooltip;
-  } else {
-    swatch.style.background = `rgb(${rgb.r},${rgb.g},${rgb.b})`;
-    card.title = def.tooltip;
-  }
-
   const formula = document.createElement('div');
   formula.className = 'card-formula';
-  formula.textContent = compositeFormula(sat, def);
+
+  if (!cfg) {
+    // Composição indisponível neste sensor → card desabilitado, sem modal.
+    card.classList.add('is-disabled');
+    card.setAttribute('aria-disabled', 'true');
+    swatch.classList.add('swatch-empty');
+    formula.textContent = '—';
+    card.title = `Composição indisponível em ${SATELLITES[sat].name}`;
+  } else {
+    card.addEventListener('click', () => openCardModal(cardDef, state.satellite, 'composite'));
+    const rgb = data ? computeComposite(data, sat, def) : null;
+    if (rgb === null) {
+      swatch.classList.add('swatch-empty');
+      card.title = data ? OUT_OF_RANGE : def.tooltip;
+    } else {
+      swatch.style.background = `rgb(${rgb.r},${rgb.g},${rgb.b})`;
+      card.title = def.tooltip;
+    }
+    formula.textContent = compositeFormula(sat, def);
+  }
 
   card.append(title, sub, swatch, formula);
   return card;
@@ -213,8 +237,8 @@ function renderCards(s) {
   const data = getStatsData(s);
   const grid = document.getElementById('cardsGrid');
   grid.replaceChildren();
-  INDEX_CARDS.forEach(def => grid.appendChild(buildIndexCard(def, s, data)));
-  COMPOSITE_CARDS.forEach(def => grid.appendChild(buildCompositeCard(def, s, data)));
+  INDEX_DEFS.forEach(def => grid.appendChild(buildIndexCard(def, s, data)));
+  COMPOSITE_DEFS.forEach(def => grid.appendChild(buildCompositeCard(def, s, data)));
 }
 
 /** Curva e rótulo para a tabela de bandas conforme o modo.
@@ -307,11 +331,92 @@ function renderLegend(s) {
   });
 }
 
-function setSatellite(sat) {
-  if (sat !== 'S2' && sat !== 'L8') return;
-  if (state.satellite === sat) return;
-  updateState({ satellite: sat }); // recálculo de todos os cards via render central
-  flashRecalc();                   // feedback visual de que tudo foi recalculado
+/* ---- Seletor de satélite (grid de cards) + painel de info --------------- */
+function buildSatelliteSelector() {
+  const grid = document.getElementById('satGrid');
+  SATELLITE_ORDER.forEach(id => {
+    const sat = SATELLITES[id];
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'sat-card';
+    btn.dataset.sat = id;
+    btn.setAttribute('aria-pressed', 'false');
+    btn.setAttribute('aria-label', sat.name);
+    btn.title = sat.name;
+
+    const ic = document.createElement('span');
+    ic.className = 'sat-ic';
+    ic.textContent = '🛰';
+    ic.setAttribute('aria-hidden', 'true');
+    const nm = document.createElement('span');
+    nm.className = 'sat-card-name';
+    nm.textContent = sat.shortName;
+
+    btn.append(ic, nm);
+    btn.addEventListener('click', () => setSatellite(id));
+    grid.appendChild(btn);
+  });
+}
+
+/** Destaca o satélite ativo no seletor. */
+function markActiveSatellite(id) {
+  document.querySelectorAll('.sat-card[data-sat]').forEach(btn => {
+    const on = btn.dataset.sat === id;
+    btn.classList.toggle('active', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+}
+
+/** Painel inline com imagem e metadados do satélite ativo (fade ao trocar). */
+function renderSatInfo(s) {
+  const sat = SATELLITES[s.satellite];
+  const box = document.getElementById('satInfo');
+  box.replaceChildren();
+
+  // Foto com fallback para placeholder (sem imagem quebrada)
+  const wrap = document.createElement('div');
+  wrap.className = 'sat-photo-wrap';
+  const img = document.createElement('img');
+  img.className = 'sat-photo';
+  img.src = sat.imagePath;
+  img.alt = `Ilustração do satélite ${sat.name} — ${sat.agency}`;
+  const ph = document.createElement('div');
+  ph.className = 'sat-photo sat-photo-ph';
+  ph.textContent = sat.shortName;
+  ph.hidden = true;
+  ph.setAttribute('aria-hidden', 'true');
+  img.addEventListener('error', () => { img.hidden = true; ph.hidden = false; });
+  wrap.append(img, ph);
+
+  const name = document.createElement('div');
+  name.className = 'sat-name';
+  name.textContent = sat.name;
+  const agency = document.createElement('div');
+  agency.className = 'sat-meta';
+  agency.textContent = sat.agency;
+
+  const specs = document.createElement('div');
+  specs.className = 'sat-specs';
+  const chip = (txt) => { const c = document.createElement('span'); c.className = 'sat-chip'; c.textContent = txt; return c; };
+  specs.append(chip(sat.resolution), chip(sat.period));
+
+  const note = document.createElement('p');
+  note.className = 'sat-note';
+  note.textContent = sat.note;
+
+  box.append(wrap, name, agency, specs, note);
+
+  // fade de entrada (150ms)
+  box.classList.remove('sat-fade');
+  void box.offsetWidth;
+  box.classList.add('sat-fade');
+}
+
+function setSatellite(id) {
+  if (!SATELLITES[id]) return;
+  if (state.satellite === id) return;
+  updateState({ satellite: id }); // recálculo de tudo via render central
+  flashRecalc();                  // feedback visual de que tudo foi recalculado
 }
 
 /** Pisca cards e tabela para sinalizar recálculo (após troca de satélite). */
@@ -333,9 +438,9 @@ function render(s) {
   renderTable(s);
   renderCards(s);
   renderLegend(s);
-  // sincroniza o estado visual do seletor de satélite
-  document.getElementById('btnSatS2').classList.toggle('active', s.satellite === 'S2');
-  document.getElementById('btnSatL8').classList.toggle('active', s.satellite === 'L8');
+  // sincroniza o seletor de satélite e o painel de info
+  markActiveSatellite(s.satellite);
+  renderSatInfo(s);
 }
 
 /* ---- Inicialização ------------------------------------------------------- */
@@ -345,15 +450,13 @@ function init() {
 
   setRenderer(render);
   initModal();
+  buildSatelliteSelector();
   buildPresets();
   buildSpectrumBar();
   initCanvasInteractions();
 
   document.getElementById('btnSingle').addEventListener('click', () => setMode('single'));
   document.getElementById('btnOverlay').addEventListener('click', () => setMode('overlay'));
-
-  document.getElementById('btnSatS2').addEventListener('click', () => setSatellite('S2'));
-  document.getElementById('btnSatL8').addEventListener('click', () => setSatellite('L8'));
 
   window.addEventListener('resize', debounce(buildSpectrumBar, 100));
 

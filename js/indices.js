@@ -1,60 +1,59 @@
-/* indices.js — definições declarativas dos cards de índice e composição,
- * cálculos puros e escalas de cor. Depende de satellites.js e utils.js. */
+/* indices.js — definições (descrição) dos índices e composições + cálculos.
+ * As BANDAS não vivem aqui: índices referenciam papéis (role) e composições
+ * vêm do satélite ativo (satellites.js). Uma única função calcula tudo. */
 
-/* ---- Cards de índice (diferença normalizada, valor em [-1, 1]) ----------- *
- * bands[sat] = [A, B]  →  índice = (A - B) / (A + B)                          */
-const INDEX_CARDS = [
+/* Rótulo legível de cada papel (para tooltips de indisponibilidade). */
+const ROLE_LABEL = {
+  blue: 'Azul', green: 'Verde', red: 'Vermelho',
+  nir: 'NIR', nir2: 'NIR estreito', swir1: 'SWIR1', swir2: 'SWIR2',
+};
+
+/* ---- Índices de diferença normalizada: (A − B)/(A + B), A/B por papel ----- */
+const INDEX_DEFS = [
   {
-    key: 'ndvi', title: 'NDVI', subtitle: 'Vegetação', scale: 'ndvi',
-    bands: { S2: ['B8', 'B4'], L8: ['B5', 'B4'] },
+    key: 'ndvi', title: 'NDVI', subtitle: 'Vegetação', scale: 'ndvi', num: ['nir', 'red'],
     tooltip: 'Índice de Vegetação por Diferença Normalizada. Valores altos (verde) indicam vegetação vigorosa; baixos indicam solo, água ou área construída.',
     whatIs: 'Índice de Vegetação por Diferença Normalizada. Mede a densidade e vigor da vegetação com base na diferença entre reflexão no infravermelho próximo e no vermelho.',
     useFor: 'Monitoramento de cobertura vegetal, detecção de estresse hídrico em culturas, mapeamento de biomassa e saúde de florestas.',
     range: '−1 (água/solo nu) → 0 (solo exposto/rocha) → 1 (vegetação densa saudável)',
   },
   {
-    key: 'ndwi', title: 'NDWI', subtitle: 'Água (McFeeters)', scale: 'water',
-    bands: { S2: ['B3', 'B8'], L8: ['B3', 'B5'] },
+    key: 'ndwi', title: 'NDWI', subtitle: 'Água (McFeeters)', scale: 'water', num: ['green', 'nir'],
     tooltip: 'Índice de Água por Diferença Normalizada (McFeeters, 1996). Realça corpos d’água; valores positivos (azul) indicam presença de água.',
     whatIs: 'Índice de Água por Diferença Normalizada (McFeeters, 1996). Realça corpos d’água usando a banda verde e o infravermelho próximo.',
     useFor: 'Mapeamento de lagos, rios e reservatórios; monitoramento de cheias e variação de espelhos d’água.',
     range: '< 0 (vegetação/solo) → ~0 (limiar água/terra) → > 0,2 (água)',
   },
   {
-    key: 'mndwi', title: 'MNDWI', subtitle: 'Água modificado', scale: 'water',
-    bands: { S2: ['B3', 'B11'], L8: ['B3', 'B6'] },
+    key: 'mndwi', title: 'MNDWI', subtitle: 'Água modificado', scale: 'water', num: ['green', 'swir1'],
     tooltip: 'NDWI Modificado (Xu, 2006), usa SWIR no lugar do NIR. Separa melhor água de áreas urbanas e solo exposto.',
     whatIs: 'Índice de Água por Diferença Normalizada Modificado (Xu, 2006). Substitui o NIR pelo SWIR1, reduzindo interferência de vegetação e áreas urbanas.',
     useFor: 'Extração de corpos d’água em áreas urbanas ou com vegetação densa onde o NDWI clássico superestima a água.',
     range: '< 0 (solo/vegetação) → > 0 (água, com menos ruído que o NDWI)',
   },
   {
-    key: 'nbr', title: 'NBR', subtitle: 'Queimadas', scale: 'ndvi',
-    bands: { S2: ['B8', 'B12'], L8: ['B5', 'B7'] },
+    key: 'nbr', title: 'NBR', subtitle: 'Queimadas', scale: 'ndvi', num: ['nir', 'swir2'],
     tooltip: 'Razão de Queimada Normalizada. Vegetação sadia em verde; áreas queimadas em vermelho.',
     whatIs: 'Razão de Queimada Normalizada. Compara o infravermelho próximo (alto em vegetação sadia) com o SWIR2 (alto em áreas queimadas).',
     useFor: 'Detecção e mapeamento de áreas queimadas e avaliação da severidade de incêndios (sobretudo via dNBR, a diferença pré/pós-fogo).',
     range: '< 0 (queimada/solo/água) → ~0 → > 0,3 (vegetação sadia)',
   },
   {
-    key: 'ndmi', title: 'NDMI', subtitle: 'Umidade da vegetação', scale: 'water',
-    bands: { S2: ['B8', 'B11'], L8: ['B5', 'B6'] },
+    key: 'ndmi', title: 'NDMI', subtitle: 'Umidade da vegetação', scale: 'water', num: ['nir', 'swir1'],
     tooltip: 'Índice de Umidade por Diferença Normalizada. Relaciona NIR e SWIR1, sensível à água da vegetação.',
     whatIs: 'Índice de Umidade por Diferença Normalizada. Relaciona o NIR com o SWIR1, sensível ao conteúdo de água da vegetação.',
     useFor: 'Monitoramento do teor de umidade da vegetação, estresse hídrico em culturas e avaliação de risco de incêndio.',
     range: '< 0 (vegetação seca / estresse hídrico) → > 0 (vegetação com bastante água)',
   },
   {
-    key: 'ndbi', title: 'NDBI', subtitle: 'Área construída', scale: 'urban',
-    bands: { S2: ['B11', 'B8'], L8: ['B6', 'B5'] },
+    key: 'ndbi', title: 'NDBI', subtitle: 'Área construída', scale: 'urban', num: ['swir1', 'nir'],
     tooltip: 'Índice de Área Construída por Diferença Normalizada. Realça superfícies impermeáveis.',
     whatIs: 'Índice de Área Construída por Diferença Normalizada. Usa SWIR1 menos NIR para realçar superfícies impermeáveis.',
     useFor: 'Mapeamento de áreas urbanas e expansão de superfícies construídas; separação entre cidade e vegetação.',
     range: '< 0 (vegetação/água) → > 0 (área construída / solo exposto)',
   },
   {
-    key: 'ndsi', title: 'NDSI', subtitle: 'Neve', scale: 'snow',
-    bands: { S2: ['B3', 'B11'], L8: ['B3', 'B6'] },
+    key: 'ndsi', title: 'NDSI', subtitle: 'Neve', scale: 'snow', num: ['green', 'swir1'],
     tooltip: 'Índice de Neve por Diferença Normalizada. Neve/gelo em tons claros.',
     whatIs: 'Índice de Neve por Diferença Normalizada. Explora a alta reflexão da neve no verde e a baixa no SWIR1.',
     useFor: 'Mapeamento de cobertura de neve e gelo; ajuda a distinguir neve de nuvens.',
@@ -62,78 +61,98 @@ const INDEX_CARDS = [
   },
 ];
 
-/* ---- Cards de composição RGB (swatch de cor simulada) ------------------- *
- * bands[sat] = [R, G, B]  →  cada canal = sample / 0.8, clamp [0,1]          */
-const COMPOSITE_CARDS = [
+/* ---- Composições RGB: as bandas vêm de SATELLITES[sat].compositions[key] -- */
+const COMPOSITE_DEFS = [
   {
     key: 'true', title: 'Cor Verdadeira', subtitle: 'True Color',
-    bands: { S2: ['B4', 'B3', 'B2'], L8: ['B4', 'B3', 'B2'] },
     tooltip: 'Composição em cores naturais (R=Vermelho, G=Verde, B=Azul), como o olho humano enxerga.',
     whatIs: 'Composição que replica o que o olho humano enxerga, usando as bandas vermelho, verde e azul do sensor.',
     useFor: 'Interpretação visual intuitiva da paisagem, identificação de feições como estradas, edificações e corpos d’água.',
   },
   {
-    key: 'falsecolor', title: 'Falsa Cor', subtitle: 'Vegetação · RGB 453',
-    bands: { S2: ['B8', 'B4', 'B3'], L8: ['B5', 'B4', 'B3'] },
+    key: 'falsecolor', title: 'Falsa Cor', subtitle: 'Vegetação',
     tooltip: 'Falsa cor com NIR no vermelho. Vegetação sadia aparece em tons de vermelho/magenta intensos.',
-    whatIs: 'Composição clássica de falsa cor que desloca as bandas para incluir o infravermelho próximo no canal vermelho. Equivale ao RGB 453 do sensor TM (Landsat 5) e ao RGB 543 do Landsat 8.',
+    whatIs: 'Composição clássica de falsa cor que inclui o infravermelho próximo no canal vermelho.',
     useFor: 'Discriminação de tipos de vegetação, detecção de áreas desmatadas e diferenciação entre vegetação nativa e cultivada.',
     interpretation: 'Vegetação saudável aparece em tons de vermelho intenso; solo exposto em marrom/bege; água em azul escuro.',
   },
   {
     key: 'swir', title: 'Composição SWIR', subtitle: 'SWIR / NIR / Verde',
-    bands: { S2: ['B11', 'B8', 'B3'], L8: ['B6', 'B5', 'B3'] },
     tooltip: 'Realça umidade e tipos de solo/rocha usando o infravermelho de ondas curtas (SWIR).',
-    whatIs: 'Composição que usa a banda SWIR1 no canal vermelho, realçando feições que o visível não distingue.',
+    whatIs: 'Composição que usa a banda SWIR no canal vermelho, realçando feições que o visível não distingue.',
     useFor: 'Mapeamento de umidade do solo, identificação de áreas queimadas, diferenciação de tipos de rocha e mineralogia de superfície.',
     interpretation: 'Áreas úmidas em azul escuro; queimadas em vermelho/laranja; solo seco em verde claro.',
   },
   {
     key: 'agri', title: 'Composição Agrícola', subtitle: 'SWIR / NIR / Azul',
-    bands: { S2: ['B11', 'B8A', 'B2'], L8: ['B6', 'B5', 'B2'] },
     tooltip: 'Composição agrícola: distingue culturas, solo e estágios de crescimento.',
-    whatIs: 'Composição que combina SWIR1, NIR estreito e azul para realce de atividade agrícola.',
+    whatIs: 'Composição que combina SWIR, NIR e azul para realce de atividade agrícola.',
     useFor: 'Distinção entre culturas em diferentes estágios fenológicos, mapeamento de áreas irrigadas e monitoramento de safra.',
     interpretation: 'Culturas ativas em verde brilhante; solo exposto em magenta; água em azul escuro.',
   },
 ];
 
+/* Acesso rápido por chave. */
+const INDEX_BY_KEY = Object.fromEntries(INDEX_DEFS.map(d => [d.key, d]));
+const COMPOSITE_BY_KEY = Object.fromEntries(COMPOSITE_DEFS.map(d => [d.key, d]));
+
+/** Papel ausente (string) que impede o índice neste satélite, ou null. */
+function missingIndexRole(satKey, def) {
+  return def.num.find(role => bandByRole(satKey, role) === null) || null;
+}
+
 /**
  * Calcula um índice de diferença normalizada para o satélite ativo.
- * Retorna `null` se alguma banda estiver fora do intervalo espectral.
+ * Retorna `null` se faltar banda (papel) ou se estiver fora do intervalo.
  */
 function computeIndex(data, satKey, def) {
-  const [aKey, bKey] = def.bands[satKey];
-  const a = sampleBand(data, bandWl(satKey, aKey));
-  const b = sampleBand(data, bandWl(satKey, bKey));
+  const ba = bandByRole(satKey, def.num[0]);
+  const bb = bandByRole(satKey, def.num[1]);
+  if (!ba || !bb) return null;
+  const a = sampleBand(data, ba.wl);
+  const b = sampleBand(data, bb.wl);
   if (a === null || b === null) return null;
   const denom = a + b;
   return denom !== 0 ? (a - b) / denom : 0;
 }
 
+/** Config da composição do satélite ativo (com bandas), ou null se indisponível. */
+function compositionConfig(satKey, key) {
+  return SATELLITES[satKey].compositions[key] || null;
+}
+
 /**
- * Calcula o swatch RGB (0–255) de uma composição para o satélite ativo.
- * Cada canal é normalizado por 0.8 e clampeado em [0,1].
- * Retorna `null` se alguma banda estiver fora do intervalo espectral.
+ * Swatch RGB (0–255) de uma composição para o satélite ativo.
+ * Cada canal = sample / 0.8, clamp [0,1]. `null` se indisponível.
  */
 function computeComposite(data, satKey, def) {
+  const cfg = compositionConfig(satKey, def.key);
+  if (!cfg) return null;
   const channel = (bandKey) => {
-    const v = sampleBand(data, bandWl(satKey, bandKey));
+    const bnd = bandById(satKey, bandKey);
+    if (!bnd) return null;
+    const v = sampleBand(data, bnd.wl);
     return v === null ? null : clamp(v / 0.8, 0, 1);
   };
-  const [rKey, gKey, bKey] = def.bands[satKey];
+  const [rKey, gKey, bKey] = cfg.bands;
   const r = channel(rKey), g = channel(gKey), b = channel(bKey);
   if (r === null || g === null || b === null) return null;
   return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
 }
 
-/** Rótulo de fórmula com os números de banda do satélite ativo. */
+/** Fórmula do índice com os números de banda do satélite ativo, ou null. */
 function indexFormula(satKey, def) {
-  const [a, b] = def.bands[satKey];
-  return `(${a}−${b}) / (${a}+${b})`;
+  const ba = bandByRole(satKey, def.num[0]);
+  const bb = bandByRole(satKey, def.num[1]);
+  if (!ba || !bb) return null;
+  return `(${ba.num}−${bb.num}) / (${ba.num}+${bb.num})`;
 }
+
+/** Fórmula da composição (R/G/B) do satélite ativo, ou null. */
 function compositeFormula(satKey, def) {
-  const [r, g, b] = def.bands[satKey];
+  const cfg = compositionConfig(satKey, def.key);
+  if (!cfg) return null;
+  const [r, g, b] = cfg.bands;
   return `R=${r}  G=${g}  B=${b}`;
 }
 

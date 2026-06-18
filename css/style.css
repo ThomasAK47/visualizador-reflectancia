@@ -83,19 +83,13 @@ body {
   background: var(--bg);
 }
 
-/* ---- Header (barra superior: título à esquerda, satélite à direita) ---- */
+/* ---- Header (barra superior) ---- */
 header {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-areas: "title sat" "subtitle sat";
-  align-items: center;
-  column-gap: 16px;
   padding: 14px 22px;
   background: var(--panel);
   border-bottom: 1px solid var(--bd);
 }
 h1 {
-  grid-area: title;
   text-align: left;
   font-size: var(--fs-title);
   font-weight: 600;
@@ -103,28 +97,78 @@ h1 {
   color: var(--text);
 }
 .subtitle {
-  grid-area: subtitle;
   text-align: left;
   font-size: var(--fs-small);
   color: var(--tx3);
 }
 
-/* ---- Seletor de satélite (no header, à direita) ---- */
-.sat-row {
-  grid-area: sat;
+/* ---- Seletor de satélite (sidebar) ---- */
+.sat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.sat-card {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: var(--fs-small);
+  gap: 7px;
+  padding: 8px 10px;
+  border: 1px solid var(--bd);
+  border-radius: var(--radius-md);
+  background: var(--panel2);
   color: var(--tx2);
+  font: 600 12px/1.1 var(--font-base);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
 }
-.sat-label {
-  font-family: var(--font-mono);
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--tx3);
+.sat-card:hover { border-color: var(--ac); color: var(--text); }
+.sat-card.active {
+  border-color: var(--ac);
+  background: rgba(45, 212, 191, 0.12);
+  color: var(--text);
 }
+.sat-ic { font-size: 14px; line-height: 1; }
+.sat-card-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Painel de info do satélite ativo */
+.sat-info { margin-bottom: 4px; }
+.sat-fade { animation: sat-fade 0.15s ease; }
+@keyframes sat-fade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .sat-fade { animation: none; } }
+
+.sat-photo-wrap { width: 100%; margin-bottom: 8px; }
+.sat-photo {
+  display: block;
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--bd);
+}
+.sat-photo-ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--elev);
+  color: var(--tx2);
+  font: 600 14px var(--font-mono);
+  letter-spacing: 1px;
+}
+.sat-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.sat-meta { font-size: var(--fs-small); color: var(--tx2); margin-bottom: 6px; }
+.sat-specs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.sat-chip {
+  font: 400 10px var(--font-mono);
+  color: var(--tx2);
+  background: var(--panel2);
+  border: 1px solid var(--bd);
+  border-radius: 4px;
+  padding: 2px 7px;
+}
+.sat-note { font-size: var(--fs-small); color: var(--tx3); line-height: 1.45; }
+
+.sidebar-divider { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--bd); }
 
 /* ---- Layout principal: sidebar (presets) + conteúdo ---- */
 main {
@@ -352,6 +396,12 @@ main > section:last-child {             /* gráfico/cards/tabela → conteúdo *
 }
 .idx-card:hover { border-color: var(--ac); background: var(--elev); }
 .idx-card:active { transform: translateY(1px); }
+.idx-card.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.idx-card.is-disabled:hover { border-color: var(--bd); background: var(--panel2); }
+.idx-card.is-disabled:active { transform: none; }
 .card-title { font-size: 14px; font-weight: 700; color: var(--text); }
 .card-sub {
   font-family: var(--font-mono);
@@ -509,9 +559,5 @@ main > section:last-child {             /* gráfico/cards/tabela → conteúdo *
   main { grid-template-columns: 1fr; }
   main > section:first-child { border-right: none; border-bottom: 1px solid var(--bd); }
   .presets-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-  header {
-    grid-template-columns: 1fr;
-    grid-template-areas: "title" "subtitle" "sat";
-    row-gap: 8px;
-  }
+  .sat-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
 }

@@ -29,20 +29,16 @@
     <header>
       <h1>Assinaturas Espectrais de Superfícies</h1>
       <p class="subtitle">Selecione uma cobertura ou desenhe sua curva diretamente no gráfico (400–2500 nm)</p>
-
-      <div class="sat-row" role="group" aria-label="Satélite">
-        <span class="sat-label">Satélite:</span>
-        <div class="toggle-wrap">
-          <button type="button" class="toggle-btn active" id="btnSatS2">Sentinel-2</button>
-          <button type="button" class="toggle-btn" id="btnSatL8">Landsat 8</button>
-        </div>
-      </div>
     </header>
 
     <main>
-      <!-- Presets -->
-      <section class="card" aria-labelledby="presetsTitle">
-        <h2 id="presetsTitle" class="section-label">COBERTURAS DO SOLO</h2>
+      <!-- Sidebar: satélite + presets -->
+      <section class="card" aria-labelledby="satTitle">
+        <h2 id="satTitle" class="section-label">SATÉLITE</h2>
+        <div class="sat-grid" id="satGrid" role="group" aria-label="Selecionar satélite"></div>
+        <div class="sat-info" id="satInfo"></div>
+
+        <h2 id="presetsTitle" class="section-label sidebar-divider">COBERTURAS DO SOLO</h2>
         <div class="presets-grid" id="presetsGrid"></div>
         <p class="hint">Clique para carregar · Arraste no gráfico para desenhar sua própria curva</p>
       </section>
