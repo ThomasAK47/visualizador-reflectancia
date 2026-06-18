@@ -123,7 +123,7 @@ const SATELLITES = {
   CBERS4A: {
     id: 'CBERS4A', name: 'CBERS-4A (WFI)', shortName: 'CB-4A',
     agency: 'INPE / CAST', resolution: '55 m', period: '2019 – presente',
-    imagePath: 'assets/satellites/cbers4a.jpg',
+    imagePath: 'assets/satellites/cbers4a.png',
     note: 'Satélite sino-brasileiro operado pelo INPE. Dados gratuitos via catálogo.cbers.inpe.br. Cobertura prioritária do território brasileiro.',
     bands: { // sensor WFI não possui bandas SWIR
       B13: b('B13', 'Blue', 'blue', 485),

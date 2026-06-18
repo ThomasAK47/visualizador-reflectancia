@@ -1,8 +1,8 @@
 # Imagens dos satélites
 
-Coloque aqui os JPGs (a UI usa placeholder cinza com o nome enquanto não existirem):
+Coloque aqui as imagens (a UI usa placeholder cinza com o nome enquanto não existirem):
 
-  sentinel2.jpg  landsat8.jpg  landsat9.jpg  landsat5.jpg  modis.jpg  cbers4a.jpg
+  sentinel2.jpg  landsat8.jpg  landsat9.jpg  landsat5.jpg  modis.jpg  cbers4a.png
 
 Fontes (domínio público / NASA / ESA), via Wikimedia Commons — baixe num navegador
 e salve com os nomes acima (o download direto por script foi bloqueado pelo Wikimedia):
