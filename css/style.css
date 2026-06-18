@@ -141,11 +141,13 @@ h1 {
 .sat-photo {
   display: block;
   width: 100%;
-  height: 120px;
+  height: 160px;
   object-fit: cover;
   border-radius: var(--radius-md);
   border: 1px solid var(--bd);
 }
+/* o atributo hidden precisa vencer o display explícito de .sat-photo* */
+.sat-photo[hidden] { display: none; }
 .sat-photo-ph {
   display: flex;
   align-items: center;
