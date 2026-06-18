@@ -183,14 +183,24 @@ main > section:last-child {             /* gráfico/cards/tabela → conteúdo *
   padding: 9px 11px;
   border-radius: var(--radius-md);
   border: 1px solid var(--bd);
+  border-left: 3px solid var(--pc, var(--bd));  /* faixa na cor do preset */
   background: var(--panel2);
   transition: border-color 0.15s, background 0.15s, color 0.15s;
   font: 600 13px/1.2 var(--font-base);
   color: var(--text);
   text-align: left;
 }
-.btn-preset:hover { border-color: var(--ac); background: var(--elev); color: var(--text); }
-.btn-preset.active { border-color: var(--ac); background: rgba(45, 212, 191, 0.12); color: var(--text); }
+.btn-preset:hover {
+  border-color: var(--pc, var(--ac));
+  background: var(--elev);
+  color: var(--text);
+}
+.btn-preset.active {
+  border-color: var(--pc, var(--ac));
+  background: var(--elev);  /* fallback p/ navegadores sem color-mix */
+  background: color-mix(in srgb, var(--pc, var(--ac)) 16%, var(--panel2));
+  color: var(--text);
+}
 
 .btn-preset .icon {
   width: 24px;
@@ -208,7 +218,7 @@ main > section:last-child {             /* gráfico/cards/tabela → conteúdo *
   border: 1px solid var(--danger-border);
 }
 
-.btn-clear { background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger); }
+.btn-clear { background: var(--danger-bg); border-color: var(--danger-border); border-left-width: 1px; color: var(--danger); }
 .btn-clear:hover { background: var(--danger-bg-hover); border-color: var(--danger-border-hover); color: var(--danger-strong); }
 
 /* ---- Alternador de modo / toggles ---- */

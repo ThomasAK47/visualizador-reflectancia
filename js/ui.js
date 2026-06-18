@@ -10,6 +10,7 @@ function buildPresets() {
     btn.type = 'button';
     btn.className = 'btn-preset';
     btn.dataset.key = p.key;
+    btn.style.setProperty('--pc', p.color); // cor do preset p/ o tint (usada no CSS)
 
     const icon = document.createElement('span');
     icon.className = 'icon';

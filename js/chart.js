@@ -2,6 +2,11 @@
  * Executa após o DOM (script defer). Expõe `chart` e funções de render
  * consumidas pela camada de UI. */
 
+/* Cores/fonte do gráfico vêm do tema (CSS vars) — fonte única de verdade. */
+const CHART_GRID = cssVar('--bd2');   // linhas de grade (visíveis no fundo escuro)
+const CHART_TEXT = cssVar('--tx2');   // ticks e títulos dos eixos
+const CHART_FONT = "'IBM Plex Mono', ui-monospace, monospace";
+
 const chart = new Chart(document.getElementById('mainChart').getContext('2d'), {
   type: 'line',
   data: {
@@ -25,15 +30,17 @@ const chart = new Chart(document.getElementById('mainChart').getContext('2d'), {
       x: {
         type: 'linear',
         min: WL_MIN, max: WL_MAX,
-        title: { display: true, text: 'Comprimento de onda (nm)', font: { size: 12 } },
-        ticks: { stepSize: 200, callback: v => v + ' nm', font: { size: 11 } },
-        grid: { color: 'rgba(0,0,0,0.05)' },
+        title: { display: true, text: 'Comprimento de onda (nm)', color: CHART_TEXT, font: { size: 12 } },
+        ticks: { stepSize: 200, callback: v => v + ' nm', color: CHART_TEXT, font: { size: 11, family: CHART_FONT } },
+        grid: { color: CHART_GRID },
+        border: { color: CHART_GRID },
       },
       y: {
         min: 0, max: 1,
-        title: { display: true, text: 'Refletância', font: { size: 12 } },
-        ticks: { stepSize: 0.1, callback: v => v.toFixed(1), font: { size: 11 } },
-        grid: { color: 'rgba(0,0,0,0.05)' },
+        title: { display: true, text: 'Refletância', color: CHART_TEXT, font: { size: 12 } },
+        ticks: { stepSize: 0.1, callback: v => v.toFixed(1), color: CHART_TEXT, font: { size: 11, family: CHART_FONT } },
+        grid: { color: CHART_GRID },
+        border: { color: CHART_GRID },
       },
     },
     plugins: {
@@ -42,6 +49,14 @@ const chart = new Chart(document.getElementById('mainChart').getContext('2d'), {
         enabled: true,
         mode: 'index',
         intersect: false,
+        backgroundColor: cssVar('--panel2'),
+        borderColor: cssVar('--bd2'),
+        borderWidth: 1,
+        titleColor: cssVar('--tx'),
+        bodyColor: cssVar('--tx2'),
+        titleFont: { family: CHART_FONT },
+        bodyFont: { family: CHART_FONT },
+        padding: 10,
         callbacks: {
           title: items => items[0].label + ' nm',
           label: item => ' ' + item.dataset.label + ': ' + item.raw.toFixed(4),
