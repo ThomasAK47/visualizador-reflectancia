@@ -49,12 +49,13 @@ function initModal() {
   // Esc e armadilha de foco
   overlay.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') { closeModal(); return; }
-    if (e.key === 'Tab') trapFocus(e);
+    if (e.key === 'Tab') trapFocus(_modalEl, e);
   });
 }
 
-function trapFocus(e) {
-  const items = _modalEl.querySelectorAll(FOCUSABLE);
+/** Mantém o Tab/Shift+Tab dentro de `modalEl` enquanto aberto. */
+function trapFocus(modalEl, e) {
+  const items = modalEl.querySelectorAll(FOCUSABLE);
   if (!items.length) { e.preventDefault(); return; }
   const first = items[0];
   const last = items[items.length - 1];
@@ -65,6 +66,52 @@ function trapFocus(e) {
     e.preventDefault();
     first.focus();
   }
+}
+
+/**
+ * Liga os comportamentos de modal (fechar por ×, clique-fora, Esc, foco e
+ * armadilha de foco) a um overlay ESTÁTICO já presente no HTML.
+ * Reusa a mesma lógica do modal dos cards. Retorna { open, close }.
+ */
+function attachModal(overlayId) {
+  const overlay = document.getElementById(overlayId);
+  if (!overlay) return { open() {}, close() {} };
+  let prevFocus = null;
+  let timer = null;
+
+  const open = () => {
+    clearTimeout(timer);
+    prevFocus = document.activeElement;
+    overlay.removeAttribute('hidden');
+    void overlay.offsetWidth; // reflow p/ a transição rodar
+    overlay.classList.add('is-open');
+    (overlay.querySelector('.modal-close') || overlay.querySelector('.modal') || overlay).focus();
+  };
+  const close = () => {
+    if (overlay.hasAttribute('hidden')) return;
+    overlay.classList.remove('is-open');
+    timer = setTimeout(() => overlay.setAttribute('hidden', ''), 200);
+    if (prevFocus && typeof prevFocus.focus === 'function') prevFocus.focus();
+    prevFocus = null;
+  };
+
+  overlay.querySelector('.modal-close')?.addEventListener('click', close);
+  overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) close(); });
+  overlay.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') close();
+    else if (e.key === 'Tab') trapFocus(overlay, e);
+  });
+  return { open, close };
+}
+
+/* Modal de créditos (overlay estático #modal-creditos). */
+let _creditsModal = null;
+function initCreditsModal() {
+  if (!_creditsModal) _creditsModal = attachModal('modal-creditos');
+}
+function openCreditsModal() {
+  initCreditsModal();
+  _creditsModal.open();
 }
 
 /**

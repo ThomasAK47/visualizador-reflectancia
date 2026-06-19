@@ -450,6 +450,8 @@ function init() {
 
   setRenderer(render);
   initModal();
+  initCreditsModal();
+  document.getElementById('btnCreditos').addEventListener('click', openCreditsModal);
   buildSatelliteSelector();
   buildPresets();
   buildSpectrumBar();

@@ -85,10 +85,34 @@ body {
 
 /* ---- Header (barra superior) ---- */
 header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   padding: 14px 22px;
   background: var(--panel);
   border-bottom: 1px solid var(--bd);
 }
+.header-titles { min-width: 0; }
+
+/* Botão de créditos — discreto, segue o design system */
+.btn-credits {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--bd);
+  border-radius: var(--radius-md);
+  background: var(--panel2);
+  color: var(--tx2);
+  font: 500 12.5px/1 var(--font-base);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.btn-credits:hover { border-color: var(--bd2); color: var(--text); background: var(--elev); }
+.btn-credits-ic { font-size: 14px; line-height: 1; color: var(--tx3); }
+.btn-credits:hover .btn-credits-ic { color: var(--ac); }
 h1 {
   text-align: left;
   font-size: var(--fs-title);
@@ -506,8 +530,8 @@ main > section:last-child {             /* gráfico/cards/tabela → conteúdo *
 
 .modal {
   position: relative;
-  width: 100%;
-  max-width: 460px;
+  width: 90vw;            /* em telas estreitas ocupa ~90% da largura */
+  max-width: 460px;       /* em telas largas fica limitado */
   max-height: 85vh;
   overflow-y: auto;
   background: var(--panel);
@@ -520,6 +544,20 @@ main > section:last-child {             /* gráfico/cards/tabela → conteúdo *
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 .modal-overlay.is-open .modal { opacity: 1; transform: translateY(0); }
+
+/* Modal de créditos: animação opacity + scale (180ms) e conteúdo de autoria */
+.modal-credits { transform: scale(0.96); transition: opacity 0.18s ease, transform 0.18s ease; }
+.modal-overlay.is-open .modal-credits { transform: scale(1); }
+.credits-subtitle { font-size: var(--fs-body); color: var(--tx2); line-height: 1.5; margin-bottom: 16px; }
+.modal-credits .modal-text strong { color: var(--text); font-weight: 700; }
+.credits-footer {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--bd);
+  font-size: var(--fs-small);
+  color: var(--tx3);
+  text-align: center;
+}
 
 .modal-close {
   position: absolute;
@@ -557,6 +595,11 @@ main > section:last-child {             /* gráfico/cards/tabela → conteúdo *
 }
 
 /* ---- Responsivo: colapsa sidebar e header em telas estreitas ---- */
+@media (max-width: 768px) {
+  .modal-overlay { padding: 0; }      /* deixa o modal alcançar 90% da largura */
+  .modal { max-width: 90vw; }         /* modal ocupa 90% da largura da tela */
+}
+
 @media (max-width: 860px) {
   main { grid-template-columns: 1fr; }
   main > section:first-child { border-right: none; border-bottom: 1px solid var(--bd); }
