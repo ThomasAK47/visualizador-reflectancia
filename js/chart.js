@@ -7,8 +7,69 @@ const CHART_GRID = cssVar('--bd2');        // linhas de grade (visíveis no fund
 const CHART_TEXT = cssVar('--tx2');        // ticks e títulos dos eixos
 const CHART_FONT = cssVar('--font-mono');  // fonte mono do tema (fonte única)
 
+/* Marcadores de banda desenhados ao passar o mouse num card de índice.
+ * Cada item: { x: wl, label: 'B8', value: number|null, color: '#hex' }. */
+let bandMarkers = [];
+
+const bandMarkerPlugin = {
+  id: 'bandMarkers',
+  afterDatasetsDraw(chart) {
+    if (!bandMarkers.length) return;
+    const { ctx, chartArea, scales } = chart;
+    const { top, bottom } = chartArea;
+
+    const chip = (text, cx, cy, bg, fg) => {
+      ctx.font = '700 11px ' + CHART_FONT;
+      const w = ctx.measureText(text).width;
+      const padX = 5, h = 16;
+      ctx.fillStyle = bg;
+      ctx.beginPath();
+      ctx.roundRect(cx - w / 2 - padX, cy - h / 2, w + padX * 2, h, 4);
+      ctx.fill();
+      ctx.fillStyle = fg;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, cx, cy + 0.5);
+    };
+
+    ctx.save();
+    bandMarkers.forEach(m => {
+      const x = scales.x.getPixelForValue(m.x);
+      if (x < chartArea.left || x > chartArea.right) return;
+
+      // linha vertical tracejada na cor da banda
+      ctx.beginPath();
+      ctx.setLineDash([4, 4]);
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = m.color;
+      ctx.moveTo(x, top);
+      ctx.lineTo(x, bottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // valor onde a linha cruza a curva
+      if (m.value != null) {
+        const y = scales.y.getPixelForValue(m.value);
+        ctx.beginPath();
+        ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = m.color;
+        ctx.fill();
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = cssVar('--panel');
+        ctx.stroke();
+        chip(m.value.toFixed(3), x, y - 14, cssVar('--panel2'), cssVar('--tx'));
+      }
+
+      // rótulo da banda abaixo da linha
+      chip(m.label, x, bottom + 11, m.color, cssVar('--bg'));
+    });
+    ctx.restore();
+  },
+};
+
 const chart = new Chart(document.getElementById('mainChart').getContext('2d'), {
   type: 'line',
+  plugins: [bandMarkerPlugin],
   data: {
     labels: wavelengths,
     datasets: [{
@@ -104,6 +165,20 @@ function setOverlayChart(overlayActive) {
     tension: 0.35,
   }));
   chart.update();
+}
+
+/** Valor da curva no comprimento de onda mais próximo (ponto exato da grade). */
+function curveValueAt(data, wl) {
+  if (!data) return null;
+  const idx = Math.round((wl - WL_MIN) / WL_STEP);
+  if (idx < 0 || idx >= data.length) return null;
+  return data[idx];
+}
+
+/** Define (ou limpa, com []) os marcadores de banda e redesenha. */
+function setBandMarkers(markers) {
+  bandMarkers = markers || [];
+  chart.update('none');
 }
 
 /** Sincroniza o gráfico com o estado atual (chamado pelo render central). */

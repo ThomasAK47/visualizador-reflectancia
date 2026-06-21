@@ -132,6 +132,18 @@ function renderInfo(data) {
 /* ---- Cards de índice e composição --------------------------------------- */
 const OUT_OF_RANGE = 'fora do intervalo espectral';
 
+/** Marca no gráfico as bandas (papéis) que alimentam um índice. */
+function showIndexMarkers(def) {
+  const sat = state.satellite;
+  const data = getStatsData(state);
+  const markers = def.num.map(role => {
+    const bnd = bandByRole(sat, role);
+    if (!bnd) return null;
+    return { x: bnd.wl, label: bnd.num, value: curveValueAt(data, bnd.wl), color: bnd.color };
+  }).filter(Boolean);
+  setBandMarkers(markers);
+}
+
 function buildIndexCard(def, s, data) {
   const sat = s.satellite;
   const card = document.createElement('button');
@@ -166,6 +178,11 @@ function buildIndexCard(def, s, data) {
     card.title = `Indisponível: ${SATELLITES[sat].name} não possui banda ${ROLE_LABEL[missing]}`;
   } else {
     card.addEventListener('click', () => openCardModal(def, state.satellite, 'index'));
+    // Hover/foco → marca no gráfico as bandas que alimentam o índice
+    card.addEventListener('mouseenter', () => showIndexMarkers(def));
+    card.addEventListener('mouseleave', () => setBandMarkers([]));
+    card.addEventListener('focus', () => showIndexMarkers(def));
+    card.addEventListener('blur', () => setBandMarkers([]));
     const value = data ? computeIndex(data, sat, def) : null;
     if (value === null) {
       valueEl.textContent = '—';

@@ -502,10 +502,11 @@ main > section:last-child {             /* gráfico/cards/tabela → conteúdo *
 }
 .sensor-cell { color: var(--tx3); }
 
-.bar-row { display: flex; align-items: center; gap: 6px; }
+/* grid simétrico (80 | número | 80) → o número fica centralizado sob o header */
+.bar-row { display: grid; grid-template-columns: 80px 1fr 80px; align-items: center; gap: 6px; }
 .bar-track { width: 80px; background: var(--elev); border-radius: 3px; height: 6px; }
 .bar-fill { height: 6px; border-radius: 3px; transition: width 0.2s; }
-.bar-num { font-weight: 600; font-family: var(--font-mono); color: var(--text); }
+.bar-num { font-weight: 600; font-family: var(--font-mono); color: var(--text); text-align: center; }
 
 .table-note { font-family: var(--font-base); font-weight: 400; color: var(--tx2); letter-spacing: 0; text-transform: none; }
 
