@@ -67,9 +67,33 @@ const bandMarkerPlugin = {
   },
 };
 
+/* Alinha a barra de espectro à área de plotagem do gráfico (descontando o
+ * eixo Y à esquerda), para que o gradiente mapeie 400–2500 nm exatamente
+ * sobre o eixo X. Roda após o layout (init e resize). */
+let _specKey = '';
+const spectrumAlignPlugin = {
+  id: 'spectrumAlign',
+  afterLayout(chart) {
+    const a = chart.chartArea;
+    const key = `${Math.round(a.left)}_${Math.round(a.right)}_${Math.round(chart.width)}`;
+    if (key === _specKey) return; // sem mudança de layout → nada a fazer
+    _specKey = key;
+
+    const wrap = document.querySelector('.spectrum-bar-wrap');
+    if (!wrap) return;
+    const canvasRect = chart.canvas.getBoundingClientRect();
+    const wrapRect = wrap.getBoundingClientRect();
+    const left = Math.max(0, Math.round(canvasRect.left + a.left - wrapRect.left));
+    const right = Math.max(0, Math.round(wrapRect.right - (canvasRect.left + a.right)));
+    wrap.style.paddingLeft = left + 'px';
+    wrap.style.paddingRight = right + 'px';
+    if (typeof buildSpectrumBar === 'function') buildSpectrumBar();
+  },
+};
+
 const chart = new Chart(document.getElementById('mainChart').getContext('2d'), {
   type: 'line',
-  plugins: [bandMarkerPlugin],
+  plugins: [bandMarkerPlugin, spectrumAlignPlugin],
   data: {
     labels: wavelengths,
     datasets: [{
