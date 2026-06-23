@@ -349,16 +349,38 @@ main > section:last-child {             /* gráfico/cards/tabela → conteúdo *
 }
 
 /* ---- Barra de espectro ---- */
-.spectrum-bar-wrap { width: 100%; margin-bottom: 10px; }
-.spectrum-bar { height: 14px; width: 100%; border-radius: 4px; display: block; }
-.axis-labels {
-  display: flex;
-  justify-content: space-between;
-  font-family: var(--font-mono);
-  font-size: 9.5px;
+.spectrum-bar-wrap { position: relative; width: 100%; margin-bottom: 10px; }
+.spectrum-bar { height: 14px; width: 100%; border-radius: 4px; display: block; cursor: crosshair; }
+
+/* Eixo da barra: rótulos lineares posicionados + readout da sonda */
+.axis-row { position: relative; height: 14px; margin-top: 3px; }
+.axis-labels { position: absolute; inset: 0; }
+.axis-tick {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font: 400 9.5px var(--font-mono);
   color: var(--tx3);
-  margin-top: 3px;
+  white-space: nowrap;
 }
+.spec-readout {
+  position: absolute;
+  top: -2px;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border: 1px solid var(--bd2);
+  border-radius: 10px;
+  background: var(--panel2);
+  color: var(--tx);
+  font: 600 10.5px var(--font-mono);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 5;
+}
+.spec-sw { width: 11px; height: 11px; border-radius: 3px; border: 1px solid var(--bd2); flex-shrink: 0; }
 
 /* ---- Legenda da sobreposição ---- */
 .legend-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }

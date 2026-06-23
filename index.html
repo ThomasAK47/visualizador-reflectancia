@@ -61,13 +61,16 @@
           <span id="overlayHint" class="overlay-hint is-hidden">Clique em múltiplos presets para comparar</span>
         </div>
 
-        <!-- Barra de gradiente espectral -->
+        <!-- Barra de gradiente espectral (sonda interativa) -->
         <div class="spectrum-bar-wrap">
-          <canvas id="specBar" class="spectrum-bar" height="14"></canvas>
-          <div class="axis-labels">
-            <span>400 nm</span><span>500 nm</span><span>600 nm</span>
-            <span>700 nm</span><span>900 nm</span><span>1100 nm</span>
-            <span>1600 nm</span><span>2200 nm</span><span>2500 nm</span>
+          <canvas id="specBar" class="spectrum-bar" height="14" role="img"
+                  aria-label="Espectro 400–2500 nm; passe o mouse para ler comprimento de onda e refletância"></canvas>
+          <div class="axis-row">
+            <div class="axis-labels" id="axisLabels"></div>
+            <div class="spec-readout is-hidden" id="specReadout" aria-hidden="true">
+              <span class="spec-sw" id="specSw"></span>
+              <span id="specReadoutText"></span>
+            </div>
           </div>
         </div>
 

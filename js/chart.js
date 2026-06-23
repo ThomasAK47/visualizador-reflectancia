@@ -60,8 +60,8 @@ const bandMarkerPlugin = {
         chip(m.value.toFixed(3), x, y - 14, cssVar('--panel2'), cssVar('--tx'));
       }
 
-      // rótulo da banda abaixo da linha
-      chip(m.label, x, bottom + 11, m.color, cssVar('--bg'));
+      // rótulo da banda abaixo da linha (omitido quando vazio, ex.: sonda)
+      if (m.label) chip(m.label, x, bottom + 11, m.color, cssVar('--bg'));
     });
     ctx.restore();
   },

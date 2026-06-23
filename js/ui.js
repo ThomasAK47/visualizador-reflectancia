@@ -472,6 +472,8 @@ function init() {
   buildSatelliteSelector();
   buildPresets();
   buildSpectrumBar();
+  buildAxisLabels();
+  initSpectrumProbe();
   initCanvasInteractions();
 
   document.getElementById('btnSingle').addEventListener('click', () => setMode('single'));

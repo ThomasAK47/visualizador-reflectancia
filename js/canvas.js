@@ -37,6 +37,62 @@ function buildSpectrumBar() {
   }
 }
 
+/** Rótulos do eixo da barra, posicionados na % linear real (batem com o gráfico). */
+function buildAxisLabels() {
+  const box = document.getElementById('axisLabels');
+  if (!box) return;
+  box.replaceChildren();
+  const ticks = [400, 700, 1000, 1300, 1600, 1900, 2200, 2500];
+  ticks.forEach(wl => {
+    const span = document.createElement('span');
+    span.className = 'axis-tick';
+    span.textContent = wl;
+    span.style.left = ((wl - WL_MIN) / (WL_MAX - WL_MIN) * 100).toFixed(2) + '%';
+    box.appendChild(span);
+  });
+}
+
+/** Sonda interativa: hover na barra → linha-guia no gráfico + readout (nm, cor, refletância). */
+function initSpectrumProbe() {
+  const canvas = document.getElementById('specBar');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const readout = document.getElementById('specReadout');
+  const labels = document.getElementById('axisLabels');
+  const sw = document.getElementById('specSw');
+  const txt = document.getElementById('specReadoutText');
+
+  const move = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width === 0) return;
+    const x = clamp(e.clientX - rect.left, 0, rect.width);
+    const wl = Math.round(WL_MIN + (WL_MAX - WL_MIN) * (x / rect.width));
+
+    // cor exata sob o cursor: lê o pixel da própria barra
+    const dpr = window.devicePixelRatio || 1;
+    const px = ctx.getImageData(
+      Math.min(canvas.width - 1, Math.round(x * dpr)),
+      Math.round(canvas.height / 2), 1, 1).data;
+
+    const refl = curveValueAt(getStatsData(state), wl);
+    sw.style.background = `rgb(${px[0]},${px[1]},${px[2]})`;
+    txt.textContent = `λ ${wl} nm` + (refl != null ? ` · ${refl.toFixed(3)}` : '');
+    readout.style.left = x + 'px';
+    readout.classList.remove('is-hidden');
+    labels.classList.add('is-hidden');
+
+    setBandMarkers([{ x: wl, label: '', value: refl, color: cssVar('--ac') }]);
+  };
+  const leave = () => {
+    readout.classList.add('is-hidden');
+    labels.classList.remove('is-hidden');
+    setBandMarkers([]);
+  };
+
+  canvas.addEventListener('mousemove', move);
+  canvas.addEventListener('mouseleave', leave);
+}
+
 /** Converte um evento de mouse/touch em { wlVal, rVal } no espaço de dados. */
 function getChartPoint(e) {
   const rect = chart.canvas.getBoundingClientRect();
