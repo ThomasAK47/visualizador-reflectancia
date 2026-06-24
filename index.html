@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Assinaturas Espectrais Interativas</title>
+  <title>Assinatura Espectral de Superfícies — Sensoriamento Remoto</title>
   <link rel="stylesheet" href="css/style.css">
+
+  <!-- Ícone animado do header (web component autocontido) -->
+  <script src="js/spectral-icon.js" defer></script>
 
   <!-- Chart.js via CDN com SRI (subresource integrity) -->
   <script
@@ -28,8 +31,8 @@
   <div class="page">
     <header>
       <div class="header-titles">
-        <h1>Assinaturas Espectrais de Superfícies</h1>
-        <p class="subtitle">Selecione uma cobertura ou desenhe sua curva diretamente no gráfico (400–2500 nm)</p>
+        <spectral-icon size="56" class="header-icon"></spectral-icon>
+        <h1>Assinatura Espectral de Superfícies <span class="h1-sub">Sensoriamento Remoto</span></h1>
       </div>
       <button type="button" class="btn-credits" id="btnCreditos">
         <span class="btn-credits-ic" aria-hidden="true">ⓘ</span><span>Créditos</span>
@@ -37,15 +40,15 @@
     </header>
 
     <main>
-      <!-- Sidebar: satélite + presets -->
-      <section class="card" aria-labelledby="satTitle">
-        <h2 id="satTitle" class="section-label">SATÉLITE</h2>
-        <div class="sat-grid" id="satGrid" role="group" aria-label="Selecionar satélite"></div>
-        <div class="sat-info" id="satInfo"></div>
-
-        <h2 id="presetsTitle" class="section-label sidebar-divider">COBERTURAS DO SOLO</h2>
+      <!-- Sidebar: presets (cobertura do solo) + satélite -->
+      <section class="card" aria-labelledby="presetsTitle">
+        <h2 id="presetsTitle" class="section-label">COBERTURAS DO SOLO</h2>
         <div class="presets-grid" id="presetsGrid"></div>
         <p class="hint">Clique para carregar · Arraste no gráfico para desenhar sua própria curva</p>
+
+        <h2 id="satTitle" class="section-label sidebar-divider">SATÉLITE</h2>
+        <div class="sat-grid" id="satGrid" role="group" aria-label="Selecionar satélite"></div>
+        <div class="sat-info" id="satInfo"></div>
       </section>
 
       <!-- Gráfico e métricas -->
