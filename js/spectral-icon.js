@@ -115,17 +115,17 @@
         B.style.strokeDashoffset = exitB;
         const a = A.animate(
           [{ strokeDashoffset: 0 }, { strokeDashoffset: arriveA }],
-          { duration: 1150, easing: 'ease-in' }
+          { duration: 383, easing: 'ease-in' }
         );
         a.onfinish = () => {
           A.style.strokeDashoffset = exitA;
           const b = B.animate(
             [{ strokeDashoffset: 0 }, { strokeDashoffset: arriveB }],
-            { duration: 1150, easing: 'ease-out' }
+            { duration: 383, easing: 'ease-out' }
           );
           b.onfinish = () => {
             B.style.strokeDashoffset = exitB;
-            setTimeout(cycle, 400);
+            setTimeout(cycle, 133);
           };
         };
       };
